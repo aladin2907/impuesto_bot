@@ -1,0 +1,158 @@
+═══════════════════════════════════════════════════════════════════
+   🔥 TuExpertoFiscal Webhook API - Quick Start Guide 🔥
+═══════════════════════════════════════════════════════════════════
+
+CREATED: 2025-10-08
+STATUS: ✅ READY FOR USE
+
+───────────────────────────────────────────────────────────────────
+1. УСТАНОВКА ЗАВИСИМОСТЕЙ
+───────────────────────────────────────────────────────────────────
+
+source venv/bin/activate
+pip install -r requirements.txt
+
+───────────────────────────────────────────────────────────────────
+2. НАСТРОЙКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ
+───────────────────────────────────────────────────────────────────
+
+Проверь файл .env:
+
+✅ OPENAI_API_KEY          - для LLM и эмбеддингов
+✅ ELASTIC_CLOUD_ID        - для поиска
+✅ ELASTIC_API_KEY         - для поиска  
+✅ SUPABASE_DB_URL         - для базы данных
+
+───────────────────────────────────────────────────────────────────
+3. ЗАПУСК СЕРВЕРА
+───────────────────────────────────────────────────────────────────
+
+# Вариант 1: Через main.py
+python main.py
+
+# Вариант 2: Через uvicorn
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+───────────────────────────────────────────────────────────────────
+4. ПРОВЕРКА РАБОТОСПОСОБНОСТИ
+───────────────────────────────────────────────────────────────────
+
+# Health Check
+curl http://localhost:8000/health
+
+# Тестовый запрос
+curl -X POST http://localhost:8000/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_context": {
+      "channel_type": "test",
+      "channel_user_id": "test-123"
+    },
+    "query_text": "¿Qué es el IVA?"
+  }'
+
+# Или запусти integration тест
+python scripts/test_webhook_api.py
+
+───────────────────────────────────────────────────────────────────
+5. ДОКУМЕНТАЦИЯ
+───────────────────────────────────────────────────────────────────
+
+📚 Swagger UI:      http://localhost:8000/docs
+📘 ReDoc:           http://localhost:8000/redoc
+📖 README:          README_WEBHOOK_API.md
+🚀 Quick Start:     docs/API_QUICKSTART.md
+🔧 Full API Docs:   docs/webhook_api_documentation.md
+💡 N8N Examples:    docs/N8N_EXAMPLES.md
+
+───────────────────────────────────────────────────────────────────
+6. ЗАПУСК ТЕСТОВ
+───────────────────────────────────────────────────────────────────
+
+# Все тесты
+pytest
+
+# С coverage
+pytest --cov=app --cov-report=html
+
+# Только search service
+pytest tests/test_search_service.py -v
+
+# Только webhook
+pytest tests/test_webhook.py -v
+
+───────────────────────────────────────────────────────────────────
+7. ИНТЕГРАЦИЯ С N8N
+───────────────────────────────────────────────────────────────────
+
+HTTP Request Node:
+  Method: POST
+  URL: http://your-server:8000/search
+  Body: {
+    "user_context": {
+      "channel_type": "telegram",
+      "channel_user_id": "{{$json.message.from.id}}"
+    },
+    "query_text": "{{$json.message.text}}"
+  }
+
+Смотри готовые примеры: docs/N8N_EXAMPLES.md
+
+───────────────────────────────────────────────────────────────────
+8. ОСНОВНЫЕ ENDPOINTS
+───────────────────────────────────────────────────────────────────
+
+GET  /              - Root info
+GET  /health        - Health check всех сервисов
+POST /search        - Основной поиск (см. примеры выше)
+GET  /stats         - Статистика сервиса
+
+───────────────────────────────────────────────────────────────────
+9. ПАРАМЕТРЫ ФИЛЬТРОВ
+───────────────────────────────────────────────────────────────────
+
+source_types:
+  • telegram  - Треды из Telegram
+  • pdf       - PDF документы
+  • calendar  - Налоговый календарь
+  • news      - Новостные статьи
+  • aeat      - Ресурсы AEAT
+  • regional  - Региональные источники
+  • all       - Все источники
+
+tax_types:
+  • IVA         - НДС
+  • IRPF        - Налог на доходы физлиц
+  • Sociedades  - Налог на прибыль
+  • Patrimonio  - Налог на имущество
+
+───────────────────────────────────────────────────────────────────
+10. TROUBLESHOOTING
+───────────────────────────────────────────────────────────────────
+
+❌ Service not initialized
+   → Проверь переменные окружения
+   → curl http://localhost:8000/health
+
+❌ Slow responses
+   → Уменьши top_k
+   → Отключи generate_response если не нужен
+
+❌ Database errors
+   → python scripts/test_supabase_connection.py
+
+❌ Elasticsearch errors
+   → python scripts/test_elasticsearch_detailed.py
+
+───────────────────────────────────────────────────────────────────
+ГОТОВО! API РАБОТАЕТ! 🎉
+───────────────────────────────────────────────────────────────────
+
+Теперь можно:
+✅ Интегрировать с N8N
+✅ Создавать Telegram ботов
+✅ Строить AI-ассистентов
+✅ Делать умный поиск по налоговой базе
+
+YO! 🔥
+

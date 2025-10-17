@@ -1,0 +1,242 @@
+{
+  "scraped_at": "2025-10-13T22:49:30.141892",
+  "source": "AEAT",
+  "source_url": "https://sede.agenciatributaria.gob.es/Sede/calendario-contribuyente.html",
+  "total_deadlines": 14,
+  "deadlines": [
+    {
+      "deadline_date": "2025-01-20",
+      "year": 2025,
+      "quarter": "Q4",
+      "month": 1,
+      "tax_type": "IVA",
+      "tax_model": "Modelo 303",
+      "description": "IVA - Autoliquidación. Régimen general. Cuarto trimestre.",
+      "applies_to": [
+        "autonomos",
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-01-20",
+      "year": 2025,
+      "quarter": "Q4",
+      "month": 1,
+      "tax_type": "Retenciones",
+      "tax_model": "Modelo 111",
+      "description": "Retenciones e ingresos a cuenta de rendimientos del trabajo. Cuarto trimestre.",
+      "applies_to": [
+        "autonomos",
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-01-30",
+      "year": 2025,
+      "quarter": "Q4",
+      "month": 1,
+      "tax_type": "IRPF",
+      "tax_model": "Modelo 130",
+      "description": "IRPF - Pago fraccionado. Actividades económicas. Cuarto trimestre.",
+      "applies_to": [
+        "autonomos"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-04-20",
+      "year": 2025,
+      "quarter": "Q1",
+      "month": 4,
+      "tax_type": "IVA",
+      "tax_model": "Modelo 303",
+      "description": "IVA - Autoliquidación. Régimen general. Primer trimestre.",
+      "applies_to": [
+        "autonomos",
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-04-20",
+      "year": 2025,
+      "quarter": "Q1",
+      "month": 4,
+      "tax_type": "Retenciones",
+      "tax_model": "Modelo 111",
+      "description": "Retenciones e ingresos a cuenta de rendimientos del trabajo. Primer trimestre.",
+      "applies_to": [
+        "autonomos",
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-04-30",
+      "year": 2025,
+      "quarter": "Q1",
+      "month": 4,
+      "tax_type": "IRPF",
+      "tax_model": "Modelo 130",
+      "description": "IRPF - Pago fraccionado. Actividades económicas. Primer trimestre.",
+      "applies_to": [
+        "autonomos"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-06-30",
+      "year": 2025,
+      "quarter": null,
+      "month": 6,
+      "tax_type": "IRPF",
+      "tax_model": "Modelo 100",
+      "description": "IRPF - Declaración anual. Renta 2024.",
+      "applies_to": [
+        "autonomos",
+        "trabajadores",
+        "pensionistas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-07-20",
+      "year": 2025,
+      "quarter": "Q2",
+      "month": 7,
+      "tax_type": "IVA",
+      "tax_model": "Modelo 303",
+      "description": "IVA - Autoliquidación. Régimen general. Segundo trimestre.",
+      "applies_to": [
+        "autonomos",
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-07-20",
+      "year": 2025,
+      "quarter": "Q2",
+      "month": 7,
+      "tax_type": "Retenciones",
+      "tax_model": "Modelo 111",
+      "description": "Retenciones e ingresos a cuenta de rendimientos del trabajo. Segundo trimestre.",
+      "applies_to": [
+        "autonomos",
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-07-20",
+      "year": 2025,
+      "quarter": null,
+      "month": 7,
+      "tax_type": "Sociedades",
+      "tax_model": "Modelo 200",
+      "description": "Impuesto sobre Sociedades. Declaración anual 2024.",
+      "applies_to": [
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-07-30",
+      "year": 2025,
+      "quarter": "Q2",
+      "month": 7,
+      "tax_type": "IRPF",
+      "tax_model": "Modelo 130",
+      "description": "IRPF - Pago fraccionado. Actividades económicas. Segundo trimestre.",
+      "applies_to": [
+        "autonomos"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-10-20",
+      "year": 2025,
+      "quarter": "Q3",
+      "month": 10,
+      "tax_type": "IVA",
+      "tax_model": "Modelo 303",
+      "description": "IVA - Autoliquidación. Régimen general. Tercer trimestre.",
+      "applies_to": [
+        "autonomos",
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-10-20",
+      "year": 2025,
+      "quarter": "Q3",
+      "month": 10,
+      "tax_type": "Retenciones",
+      "tax_model": "Modelo 111",
+      "description": "Retenciones e ingresos a cuenta de rendimientos del trabajo. Tercer trimestre.",
+      "applies_to": [
+        "autonomos",
+        "empresas"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    },
+    {
+      "deadline_date": "2025-10-30",
+      "year": 2025,
+      "quarter": "Q3",
+      "month": 10,
+      "tax_type": "IRPF",
+      "tax_model": "Modelo 130",
+      "description": "IRPF - Pago fraccionado. Actividades económicas. Tercer trimestre.",
+      "applies_to": [
+        "autonomos"
+      ],
+      "region": "national",
+      "payment_required": true,
+      "declaration_required": true,
+      "penalty_for_late": "Recargo del 5% al 20% según el retraso"
+    }
+  ]
+}

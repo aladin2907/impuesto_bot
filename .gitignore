@@ -1,0 +1,26 @@
+# Environments
+.env
+.venv
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# Data
+data/raw_documents/*.pdf
+data/raw_documents/*.docx
+data/processed/
+*.db
+
+# Logs
+logs/
+*.log
+telegram_session.session
+telegram_session.session-journal

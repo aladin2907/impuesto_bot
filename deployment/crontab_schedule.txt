@@ -1,0 +1,41 @@
+# TuExpertoFiscal NAIL - Cron Schedule
+# Add this to your crontab with: crontab -e
+# Make sure to update paths to match your server setup
+
+# Set shell and path
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# Project paths (UPDATE THESE)
+PROJECT_DIR=/home/your_user/impuesto_bot
+VENV_PYTHON=/home/your_user/impuesto_bot/venv/bin/python
+
+# Redirect logs
+LOG_DIR=/home/your_user/impuesto_bot/logs
+
+# ============================================================
+# AUTOMATED TASKS
+# ============================================================
+
+# 1. Telegram Groups Ingestion - Every Monday at 2:00 AM
+0 2 * * 1 cd $PROJECT_DIR && $VENV_PYTHON scripts/ingestion/ingest_telegram_groups.py >> $LOG_DIR/telegram_ingest.log 2>&1
+
+# 2. News Articles Ingestion - Every day at 8:00 AM
+0 8 * * * cd $PROJECT_DIR && $VENV_PYTHON scripts/ingestion/ingest_news_articles.py >> $LOG_DIR/news_ingest.log 2>&1
+
+# 3. Calendar Reminders - Every day at 9:00 AM (7 days before deadlines)
+0 9 * * * cd $PROJECT_DIR && $VENV_PYTHON scripts/reminders/send_calendar_reminders.py >> $LOG_DIR/reminders.log 2>&1
+
+# ============================================================
+# LOG ROTATION (keep logs clean)
+# ============================================================
+
+# Clean old logs - Every Sunday at 3:00 AM
+0 3 * * 0 find $LOG_DIR -name "*.log" -mtime +30 -delete
+
+# ============================================================
+# HEALTH CHECKS (optional but recommended)
+# ============================================================
+
+# Check if bot is running - Every hour
+0 * * * * curl -fsS -m 10 --retry 5 -o /dev/null https://your-bot-domain.com/health || echo "Bot health check failed" | mail -s "TuExpertoFiscal Alert" your@email.com

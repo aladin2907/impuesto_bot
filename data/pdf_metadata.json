@@ -1,0 +1,81 @@
+{
+  "collected_at": "2025-10-12T17:46:56.765851",
+  "total_documents": 4,
+  "successful_downloads": 4,
+  "failed_downloads": 0,
+  "documents": [
+    {
+      "document_title": "Ley 35/2006 IRPF - Impuesto sobre la Renta de las Personas Físicas",
+      "document_type": "law",
+      "document_number": "Ley 35/2006",
+      "source_url": "https://www.boe.es/buscar/pdf/2006/BOE-A-2006-20764-consolidado.pdf",
+      "categories": [
+        "irpf",
+        "renta",
+        "autonomos"
+      ],
+      "description": "Ley del Impuesto sobre la Renta de las Personas Físicas",
+      "region": "national",
+      "language": "es",
+      "success": true,
+      "file_path": "data/pdf_documents/Ley_35_2006.pdf",
+      "file_size_bytes": 1108431,
+      "file_hash": "73ad7f008228eac7f2ba79541470580daf20d136368bc761fb5462ec33d1869b",
+      "downloaded_at": "2025-10-01T18:56:11.674356"
+    },
+    {
+      "document_title": "Ley 37/1992 IVA - Impuesto sobre el Valor Añadido",
+      "document_type": "law",
+      "document_number": "Ley 37/1992",
+      "source_url": "https://www.boe.es/buscar/pdf/1992/BOE-A-1992-28740-consolidado.pdf",
+      "categories": [
+        "iva",
+        "impuesto_indirecto"
+      ],
+      "description": "Ley del Impuesto sobre el Valor Añadido",
+      "region": "national",
+      "language": "es",
+      "success": true,
+      "file_path": "data/pdf_documents/Ley_37_1992.pdf",
+      "file_size_bytes": 972329,
+      "file_hash": "81ffb248b5fff2f385dea9e2cddde18f78f6dce74dd9491c55bc8e272bee14bc",
+      "downloaded_at": "2025-10-01T18:56:12.008325"
+    },
+    {
+      "document_title": "Real Decreto 439/2007 Reglamento IRPF",
+      "document_type": "regulation",
+      "document_number": "RD 439/2007",
+      "source_url": "https://www.boe.es/buscar/pdf/2007/BOE-A-2007-7648-consolidado.pdf",
+      "categories": [
+        "irpf",
+        "reglamento"
+      ],
+      "description": "Reglamento del Impuesto sobre la Renta de las Personas Físicas",
+      "region": "national",
+      "language": "es",
+      "success": true,
+      "file_path": "data/pdf_documents/RD_439_2007.pdf",
+      "file_size_bytes": 711406,
+      "file_hash": "80f766989289f1b945a9fb32d6ee33cad169e1b7ffa771ed4918c0095e29a9bc",
+      "downloaded_at": "2025-10-12T17:46:56.765844"
+    },
+    {
+      "document_title": "Ley 27/2014 Impuesto sobre Sociedades",
+      "document_type": "law",
+      "document_number": "Ley 27/2014",
+      "source_url": "https://www.boe.es/buscar/pdf/2014/BOE-A-2014-12328-consolidado.pdf",
+      "categories": [
+        "sociedades",
+        "empresas"
+      ],
+      "description": "Ley del Impuesto sobre Sociedades",
+      "region": "national",
+      "language": "es",
+      "success": true,
+      "file_path": "data/pdf_documents/Ley_27_2014.pdf",
+      "file_size_bytes": 1000004,
+      "file_hash": "ba4ed7eeaea2bd23dc6dae4d1ff1dd86f8e8c725e0ab6f0cd37b19e92013e00b",
+      "downloaded_at": "2025-10-01T18:56:12.459462"
+    }
+  ]
+}

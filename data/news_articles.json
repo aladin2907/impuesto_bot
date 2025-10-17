@@ -1,0 +1,177 @@
+{
+  "scraped_at": "2025-10-01T18:56:06.919870",
+  "total_articles": 8,
+  "sources": [
+    "Cinco Días",
+    "Expansión"
+  ],
+  "articles": [
+    {
+      "article_url": "https://www.expansion.com/economia/fiscal/2024/10/01/articulo1.html",
+      "article_title": "Hacienda modifica el IRPF para 2025: estos son los cambios que afectan a autónomos",
+      "news_source": "Expansión",
+      "author": "Juan García",
+      "published_at": "2025-09-29T18:56:05.914250",
+      "summary": "La Agencia Tributaria introduce cambios en el IRPF que afectarán a los trabajadores autónomos a partir de 2025...",
+      "content": "\n                La Agencia Tributaria ha anunciado modificaciones importantes en el Impuesto sobre la Renta de las Personas Físicas (IRPF) \n                que entrarán en vigor en 2025. Estos cambios afectarán principalmente a los trabajadores autónomos.\n                \n                Entre las principales novedades se encuentra la actualización de las escalas de retención y nuevos límites para deducciones.\n                Los autónomos que facturen menos de 15.000 euros al año podrán beneficiarse de reducciones adicionales.\n                \n                Además, se simplifica el proceso de declaración trimestral para facilitar el cumplimiento fiscal.\n                ",
+      "categories": [
+        "irpf",
+        "autonomos",
+        "cambios_legislativos"
+      ],
+      "keywords": [
+        "irpf",
+        "autónomos",
+        "2025",
+        "hacienda",
+        "cambios"
+      ],
+      "content_length": 450
+    },
+    {
+      "article_url": "https://www.expansion.com/economia/fiscal/2024/09/28/articulo2.html",
+      "article_title": "IVA: nuevas obligaciones para empresas desde octubre 2024",
+      "news_source": "Expansión",
+      "author": "María López",
+      "published_at": "2025-09-26T18:56:05.914264",
+      "summary": "Las empresas tendrán que cumplir con nuevos requisitos de facturación electrónica obligatoria...",
+      "content": "\n                A partir de octubre de 2024, las empresas españolas deberán cumplir con nuevas obligaciones relacionadas con el IVA\n                y la facturación electrónica. El sistema Verifactu se implementa de forma gradual.\n                \n                Todas las facturas deberán ser emitidas a través de sistemas certificados por la AEAT. Las empresas tendrán un periodo\n                de adaptación de 6 meses para implementar los nuevos sistemas.\n                \n                El incumplimiento de estas obligaciones puede acarrear sanciones de hasta 10.000 euros.\n                ",
+      "categories": [
+        "iva",
+        "facturacion",
+        "verifactu"
+      ],
+      "keywords": [
+        "iva",
+        "facturación electrónica",
+        "verifactu",
+        "empresas"
+      ],
+      "content_length": 380
+    },
+    {
+      "article_url": "https://www.expansion.com/economia/fiscal/2024/09/25/articulo3.html",
+      "article_title": "Modelo 303: guía completa para la declaración del IVA del tercer trimestre",
+      "news_source": "Expansión",
+      "author": "Carlos Martínez",
+      "published_at": "2025-09-23T18:56:05.914265",
+      "summary": "Todo lo que necesitas saber para presentar correctamente el Modelo 303 correspondiente al tercer trimestre...",
+      "content": "\n                El plazo para presentar el Modelo 303 del tercer trimestre finaliza el 20 de octubre. Los autónomos y empresas \n                deben revisar todas sus facturas del periodo julio-septiembre.\n                \n                Es importante verificar que todas las facturas emitidas y recibidas estén correctamente registradas. Los errores \n                más comunes incluyen la incorrecta aplicación del tipo de IVA y la omisión de facturas.\n                \n                La AEAT recomienda usar el sistema de borradores para minimizar errores. Las sanciones por declaraciones incorrectas \n                pueden llegar al 20% del importe omitido.\n                ",
+      "categories": [
+        "iva",
+        "modelo_303",
+        "guias"
+      ],
+      "keywords": [
+        "modelo 303",
+        "iva",
+        "tercer trimestre",
+        "autónomos"
+      ],
+      "content_length": 420
+    },
+    {
+      "article_url": "https://www.expansion.com/economia/fiscal/2024/09/20/articulo4.html",
+      "article_title": "Cotizaciones de autónomos: cambios en la base mínima para 2025",
+      "news_source": "Expansión",
+      "author": "Ana Rodríguez",
+      "published_at": "2025-09-18T18:56:05.914267",
+      "summary": "La Seguridad Social anuncia el incremento de la base mínima de cotización para trabajadores autónomos...",
+      "content": "\n                La Seguridad Social ha confirmado que la base mínima de cotización para autónomos aumentará en 2025.\n                Este cambio forma parte del nuevo sistema de cotización por ingresos reales.\n                \n                Los autónomos que coticen por la base mínima pagarán aproximadamente 310 euros mensuales, un incremento\n                del 3.8% respecto a 2024. Sin embargo, quienes declaren ingresos bajos podrán beneficiarse de reducciones.\n                \n                El sistema permite ajustar la base de cotización hasta 6 veces al año para adaptarse a las fluctuaciones\n                de ingresos de los autónomos.\n                ",
+      "categories": [
+        "seguridad_social",
+        "autonomos",
+        "cotizaciones"
+      ],
+      "keywords": [
+        "autónomos",
+        "cotizaciones",
+        "seguridad social",
+        "2025"
+      ],
+      "content_length": 410
+    },
+    {
+      "article_url": "https://www.expansion.com/economia/fiscal/2024/09/15/articulo5.html",
+      "article_title": "Renta 2024: novedades en deducciones para trabajadores autónomos",
+      "news_source": "Expansión",
+      "author": "Pedro Sánchez",
+      "published_at": "2025-09-13T18:56:05.914268",
+      "summary": "La declaración de la renta 2024 incluye nuevas deducciones para gastos de suministros y material de oficina...",
+      "content": "\n                Los autónomos podrán deducir un mayor porcentaje de gastos en la próxima declaración de la renta.\n                Entre las novedades destacan las deducciones por teletrabajo y gastos de formación.\n                \n                Se podrá deducir hasta el 30% de los gastos de suministros del hogar si se trabaja desde casa, siempre\n                que se disponga de un espacio dedicado exclusivamente a la actividad profesional.\n                \n                También se amplían las deducciones por inversión en digitalización y ciberseguridad, con límites\n                de hasta 2.000 euros anuales.\n                ",
+      "categories": [
+        "irpf",
+        "deducciones",
+        "autonomos"
+      ],
+      "keywords": [
+        "renta",
+        "deducciones",
+        "autónomos",
+        "irpf"
+      ],
+      "content_length": 395
+    },
+    {
+      "article_url": "https://cincodias.elpais.com/2024/09/28/articulo1.html",
+      "article_title": "El Gobierno aprueba beneficios fiscales para startups y emprendedores",
+      "news_source": "Cinco Días",
+      "author": "Laura Fernández",
+      "published_at": "2025-09-27T18:56:06.919349",
+      "summary": "Nuevas deducciones fiscales para empresas tecnológicas y emprendedores en fase inicial...",
+      "content": "\n                El Consejo de Ministros ha aprobado un paquete de medidas fiscales destinadas a impulsar el ecosistema\n                de startups en España. Las empresas de reciente creación podrán beneficiarse de reducciones en el\n                Impuesto de Sociedades.\n                \n                Las startups tecnológicas tendrán un tipo reducido del 15% en el Impuesto de Sociedades durante\n                los primeros cuatro años de actividad, en lugar del 25% habitual.\n                \n                Además, se introducen deducciones por la contratación de personal altamente cualificado y por\n                inversión en I+D+i.\n                ",
+      "categories": [
+        "sociedades",
+        "startups",
+        "deducciones"
+      ],
+      "keywords": [
+        "startups",
+        "impuesto sociedades",
+        "deducciones",
+        "emprendedores"
+      ],
+      "content_length": 430
+    },
+    {
+      "article_url": "https://cincodias.elpais.com/2024/09/22/articulo2.html",
+      "article_title": "Calendario fiscal de octubre 2024: todas las fechas clave",
+      "news_source": "Cinco Días",
+      "author": "Roberto Gómez",
+      "published_at": "2025-09-21T18:56:06.919380",
+      "summary": "Resumen de todas las obligaciones fiscales que vencen en octubre para autónomos y empresas...",
+      "content": "\n                Octubre es un mes clave en el calendario fiscal español. Los autónomos y empresas deben estar atentos\n                a múltiples vencimientos.\n                \n                El 20 de octubre vence el plazo para presentar el Modelo 303 (IVA trimestral) y el Modelo 111\n                (retenciones). El 30 de octubre es el límite para el Modelo 130 (pago fraccionado IRPF).\n                \n                Es fundamental planificar con antelación para evitar recargos y sanciones. La presentación fuera\n                de plazo puede suponer un recargo del 5% al 20% según el retraso.\n                ",
+      "categories": [
+        "calendario_fiscal",
+        "obligaciones"
+      ],
+      "keywords": [
+        "calendario",
+        "octubre",
+        "vencimientos",
+        "modelo 303"
+      ],
+      "content_length": 405
+    },
+    {
+      "article_url": "https://cincodias.elpais.com/2024/09/18/articulo3.html",
+      "article_title": "Sociedades limitadas: nuevas obligaciones contables desde 2025",
+      "news_source": "Cinco Días",
+      "author": "Isabel Torres",
+      "published_at": "2025-09-17T18:56:06.919385",
+      "summary": "Las SL deberán presentar información adicional sobre su estructura de beneficiarios...",
+      "content": "\n                A partir de 2025, las sociedades limitadas españolas tendrán que cumplir con nuevas obligaciones\n                de transparencia fiscal. Deberán reportar información detallada sobre sus beneficiarios finales.\n                \n                Esta medida forma parte de las directivas europeas contra el blanqueo de capitales. Las empresas\n                deberán actualizar sus datos en el Registro Mercantil.\n                \n                El incumplimiento de estas obligaciones puede conllevar sanciones de hasta 30.000 euros para\n                las empresas y responsabilidad personal para los administradores.\n                ",
+      "categories": [
+        "sociedades",
+        "transparencia",
+        "obligaciones"
+      ],
+      "keywords": [
+        "sociedades limitadas",
+        "beneficiarios",
+        "transparencia"
+      ],
+      "content_length": 390
+    }
+  ]
+}

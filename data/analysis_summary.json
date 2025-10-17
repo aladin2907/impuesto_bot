@@ -1,0 +1,28 @@
+{
+  "analyzed_at": "2025-10-01T18:57:18.074279",
+  "sources": {
+    "telegram": {
+      "groups": 2,
+      "total_threads": 75914,
+      "total_messages": 183856,
+      "schema_compatible": true
+    },
+    "tax_calendar": {
+      "total_deadlines": 14,
+      "schema_compatible": true
+    },
+    "news": {
+      "total_articles": 8,
+      "sources": [
+        "Cinco Días",
+        "Expansión"
+      ],
+      "schema_compatible": true
+    },
+    "pdf_documents": {
+      "total_documents": 4,
+      "successful_downloads": 3,
+      "schema_compatible": true
+    }
+  }
+}

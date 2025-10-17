@@ -1,0 +1,23 @@
+fastapi
+uvicorn[standard]
+pydantic
+langchain
+langchain-openai
+langchain-google-genai
+langchain-anthropic
+langchain-elasticsearch
+langchain-community
+elasticsearch
+psycopg2-binary
+python-dotenv
+aiogram
+telethon
+beautifulsoup4
+requests
+pypdf
+
+# Testing dependencies
+pytest
+pytest-asyncio
+pytest-cov
+httpx

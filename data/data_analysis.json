@@ -1,0 +1,59 @@
+{
+  "telegram": {
+    "status": "success",
+    "total_threads": 75914,
+    "total_messages": 183856,
+    "groups": {
+      "nomads_threads": {
+        "threads": 69719,
+        "messages": 165004
+      },
+      "it_threads": {
+        "threads": 6195,
+        "messages": 18852
+      }
+    },
+    "files_count": 2
+  },
+  "tax_documents": {
+    "status": "success",
+    "total_size": 6191269,
+    "total_size_mb": 5.904454231262207,
+    "documents": {
+      "IVA_Value_Added_Tax.html": {
+        "size": 1635145,
+        "size_mb": 1.5593957901000977
+      },
+      "Impuesto_Sucesiones_Donaciones.html": {
+        "size": 384607,
+        "size_mb": 0.3667898178100586
+      },
+      "Impuesto_Patrimonio_Wealth_Tax.html": {
+        "size": 13318,
+        "size_mb": 0.012701034545898438
+      },
+      "IRPF_Personal_Income_Tax.html": {
+        "size": 1659937,
+        "size_mb": 1.5830392837524414
+      },
+      "LGT_General_Tax_Law.html": {
+        "size": 1326442,
+        "size_mb": 1.264993667602539
+      },
+      "Impuesto_Sociedades_Corporate_Tax.html": {
+        "size": 1171820,
+        "size_mb": 1.1175346374511719
+      }
+    },
+    "files_count": 6
+  },
+  "aeat_forms": {
+    "status": "no_files"
+  },
+  "news_articles": {
+    "status": "no_files"
+  },
+  "tax_calendar": {
+    "status": "not_found"
+  }
+}
