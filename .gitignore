@@ -13,10 +13,8 @@ __pycache__/
 .idea/
 .vscode/
 
-# Data
-data/raw_documents/*.pdf
-data/raw_documents/*.docx
-data/processed/
+# Data - all data is in databases (Supabase, Elasticsearch)
+data/
 *.db
 
 # Logs
