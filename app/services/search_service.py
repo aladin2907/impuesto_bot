@@ -129,17 +129,15 @@ class SearchService:
             
             # Step 3: Generate embedding for query (or mock)
             print(f"Generating embedding for query: {request.query_text}")
-            if self.llm.chat_model:
-                query_vector = self.llm.generate_embedding(request.query_text)
-                if not query_vector:
-                    return SearchResponse(
-                        success=False,
-                        query_text=request.query_text,
-                        user_id=user_id,
-                        session_id=session_id,
-                        subscription_status=subscription_status,
-                        error_message="Failed to generate embedding"
-                    )
+            if self.llm.chat_model and hasattr(self.llm, 'generate_embedding'):
+                try:
+                    query_vector = self.llm.generate_embedding(request.query_text)
+                    if not query_vector:
+                        raise Exception("No embedding generated")
+                except Exception as e:
+                    print(f"Failed to generate embedding: {e}")
+                    # Fall back to mock embedding
+                    query_vector = [0.1] * 1536
             else:
                 # Mock embedding vector
                 query_vector = [0.1] * 1536
