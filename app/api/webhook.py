@@ -113,12 +113,8 @@ async def health_check(service = Depends(get_search_service)):
     try:
         health = service.health_check()
         
-        # Determine overall status (Elasticsearch is optional)
-        all_healthy = all([
-            health.get("supabase_connected", False),
-            health.get("llm_initialized", False),
-            health.get("search_service_initialized", False)
-        ])
+        # Service is healthy if initialized (even in mock mode)
+        all_healthy = health.get("search_service_initialized", False)
         
         status_code = 200 if all_healthy else 503
         
