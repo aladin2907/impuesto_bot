@@ -4,7 +4,7 @@ Provides unified search interface for knowledge base
 """
 
 import time
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 from datetime import datetime
 
 from app.models.search import (
