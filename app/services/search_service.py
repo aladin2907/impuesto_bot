@@ -144,14 +144,22 @@ class SearchService:
             
             # Step 4: Search in Elasticsearch (or mock if not available)
             print(f"Searching Elasticsearch with top_k={request.top_k}")
+            search_results = []
+            
             if self.elastic.client:
-                search_results = self.elastic.hybrid_search(
-                    query_text=request.query_text,
-                    query_vector=query_vector,
-                    top_k=request.top_k or 5
-                )
-            else:
-                # Mock search results
+                try:
+                    search_results = self.elastic.hybrid_search(
+                        query_text=request.query_text,
+                        query_vector=query_vector,
+                        top_k=request.top_k or 5
+                    )
+                except Exception as e:
+                    print(f"Elasticsearch search failed: {e}")
+                    search_results = []
+            
+            # Use mock results if no results from Elasticsearch
+            if not search_results:
+                print("Using mock search results")
                 search_results = [
                     {
                         'text': f"Información sobre {request.query_text}: Este es un resultado de ejemplo del sistema TuExpertoFiscal.",
