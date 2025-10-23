@@ -113,9 +113,8 @@ async def health_check(service = Depends(get_search_service)):
     try:
         health = service.health_check()
         
-        # Determine overall status
+        # Determine overall status (Elasticsearch is optional)
         all_healthy = all([
-            health.get("elasticsearch_connected", False),
             health.get("supabase_connected", False),
             health.get("llm_initialized", False),
             health.get("search_service_initialized", False)

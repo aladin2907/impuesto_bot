@@ -34,20 +34,20 @@ class SearchService:
         try:
             print("Initializing search service...")
             
-            # Connect to Elasticsearch
-            if not self.elastic.connect():
-                print("Failed to connect to Elasticsearch")
-                return False
-            
-            # Connect to Supabase
+            # Connect to Supabase (required)
             if not self.supabase.connect():
                 print("Failed to connect to Supabase")
                 return False
             
-            # Initialize LLM service
+            # Initialize LLM service (required)
             if not self.llm.initialize():
                 print("Failed to initialize LLM service")
                 return False
+            
+            # Connect to Elasticsearch (optional for now)
+            elastic_connected = self.elastic.connect()
+            if not elastic_connected:
+                print("Warning: Elasticsearch not available, using Supabase only")
             
             self.initialized = True
             print("✅ Search service initialized successfully")
