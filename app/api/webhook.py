@@ -159,19 +159,17 @@ async def search_endpoint(
     """
     Main search endpoint for N8N integration
     
-    Accepts search queries from N8N and returns results with optional LLM-generated response.
+    Receives list of channels from N8N, searches in specified channels, and returns results.
     
     **Request Parameters:**
     - **user_context**: User identification (channel_type, channel_user_id, metadata)
     - **query_text**: Search query from user (1-1000 characters)
-    - **filters**: Optional filters (source_types, date_range, tax_types, etc.)
+    - **channels**: List of channels to search in (telegram, pdf, calendar, news, aeat)
     - **top_k**: Number of results to return (1-20, default: 5)
-    - **generate_response**: Whether to generate LLM response (default: true)
     
     **Response:**
     - **success**: Whether search was successful
-    - **results**: List of search results with text, metadata, and scores
-    - **generated_response**: LLM-generated answer (if requested)
+    - **results**: List of search results from specified channels
     - **user_id**: User UUID in our system
     - **session_id**: Session UUID for conversation context
     - **subscription_status**: User's subscription level
@@ -189,12 +187,8 @@ async def search_endpoint(
         }
       },
       "query_text": "¿Cuándo tengo que presentar el modelo 303?",
-      "filters": {
-        "source_types": ["calendar", "aeat"],
-        "tax_types": ["IVA"]
-      },
-      "top_k": 5,
-      "generate_response": true
+      "channels": ["telegram", "calendar", "aeat"],
+      "top_k": 5
     }
     ```
     """

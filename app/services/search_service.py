@@ -142,40 +142,54 @@ class SearchService:
                 # Mock embedding vector
                 query_vector = [0.1] * 1536
             
-            # Step 4: Search in Elasticsearch (or mock if not available)
-            print(f"Searching Elasticsearch with top_k={request.top_k}")
+            # Step 4: Search in specified channels
+            print(f"Searching in channels: {request.channels}")
             search_results = []
             
-            if self.elastic.client:
-                try:
-                    search_results = self.elastic.hybrid_search(
-                        query_text=request.query_text,
-                        query_vector=query_vector,
-                        top_k=request.top_k or 5
-                    )
-                except Exception as e:
-                    print(f"Elasticsearch search failed: {e}")
-                    search_results = []
+            # Search in each specified channel
+            for channel in request.channels:
+                print(f"Searching in channel: {channel}")
+                
+                if channel == SourceType.TELEGRAM:
+                    # Search in Telegram data
+                    channel_results = self._search_telegram(request.query_text)
+                elif channel == SourceType.PDF:
+                    # Search in PDF documents
+                    channel_results = self._search_pdf(request.query_text)
+                elif channel == SourceType.CALENDAR:
+                    # Search in tax calendar
+                    channel_results = self._search_calendar(request.query_text)
+                elif channel == SourceType.NEWS:
+                    # Search in news articles
+                    channel_results = self._search_news(request.query_text)
+                elif channel == SourceType.AEAT:
+                    # Search in AEAT resources
+                    channel_results = self._search_aeat(request.query_text)
+                else:
+                    # Mock results for unknown channels
+                    channel_results = [
+                        {
+                            'text': f"Resultado de {channel} para '{request.query_text}': Información relevante encontrada.",
+                            'metadata': {'source_type': channel, 'category': 'tax_info'},
+                            'score': 0.8
+                        }
+                    ]
+                
+                search_results.extend(channel_results)
             
-            # Use mock results if no results from Elasticsearch
+            # Use mock results if no channels specified or no results
             if not search_results:
-                print("Using mock search results")
+                print("No channels specified or no results, using mock")
                 search_results = [
                     {
                         'text': f"Información sobre {request.query_text}: Este es un resultado de ejemplo del sistema TuExpertoFiscal.",
                         'metadata': {'source_type': 'mock', 'category': 'tax_info'},
                         'score': 0.9
-                    },
-                    {
-                        'text': f"Normativa fiscal relacionada con {request.query_text}: Consulta la legislación vigente en España.",
-                        'metadata': {'source_type': 'mock', 'category': 'legislation'},
-                        'score': 0.8
                     }
                 ]
             
-            # Apply filters if provided
-            if request.filters:
-                search_results = self._apply_filters(search_results, request.filters)
+            # Limit results to top_k
+            search_results = search_results[:request.top_k or 5]
             
             # Convert to SearchResult models
             results = [
@@ -213,7 +227,6 @@ class SearchService:
                 user_id=user_id,
                 session_id=session_id,
                 results=results,
-                generated_response=generated_response,
                 subscription_status=subscription_status,
                 processing_time_ms=processing_time_ms
             )
@@ -375,6 +388,61 @@ Responde basándote en el contexto proporcionado."""
             "search_service_initialized": self.initialized
         }
     
+    def _search_telegram(self, query: str) -> List[Dict]:
+        """Search in Telegram channels data"""
+        # Mock implementation - replace with real Telegram search
+        return [
+            {
+                'text': f"Telegram: Encontrado '{query}' en canales de impuestos",
+                'metadata': {'source_type': 'telegram', 'channel': 'tax_channel'},
+                'score': 0.9
+            }
+        ]
+    
+    def _search_pdf(self, query: str) -> List[Dict]:
+        """Search in PDF documents"""
+        # Mock implementation - replace with real PDF search
+        return [
+            {
+                'text': f"PDF: Documento fiscal relacionado con '{query}'",
+                'metadata': {'source_type': 'pdf', 'document': 'tax_law.pdf'},
+                'score': 0.8
+            }
+        ]
+    
+    def _search_calendar(self, query: str) -> List[Dict]:
+        """Search in tax calendar"""
+        # Mock implementation - replace with real calendar search
+        return [
+            {
+                'text': f"Calendario: Fecha límite para '{query}' - 31 de enero",
+                'metadata': {'source_type': 'calendar', 'deadline': '2025-01-31'},
+                'score': 0.95
+            }
+        ]
+    
+    def _search_news(self, query: str) -> List[Dict]:
+        """Search in news articles"""
+        # Mock implementation - replace with real news search
+        return [
+            {
+                'text': f"Noticias: Última actualización sobre '{query}'",
+                'metadata': {'source_type': 'news', 'date': '2025-01-15'},
+                'score': 0.7
+            }
+        ]
+    
+    def _search_aeat(self, query: str) -> List[Dict]:
+        """Search in AEAT resources"""
+        # Mock implementation - replace with real AEAT search
+        return [
+            {
+                'text': f"AEAT: Información oficial sobre '{query}'",
+                'metadata': {'source_type': 'aeat', 'official': True},
+                'score': 0.9
+            }
+        ]
+
     def close(self):
         """Close all service connections"""
         try:

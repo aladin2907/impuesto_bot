@@ -73,7 +73,7 @@ class UserContext(BaseModel):
 
 
 class SearchRequest(BaseModel):
-    """Request model for search endpoint"""
+    """Request model for search endpoint - receives channels list from n8n"""
     user_context: UserContext = Field(
         ...,
         description="User context and identification"
@@ -85,19 +85,16 @@ class SearchRequest(BaseModel):
         description="Search query text from user",
         examples=["¿Cuándo tengo que presentar el modelo 303?"]
     )
-    filters: Optional[SearchFilters] = Field(
-        default=None,
-        description="Optional search filters"
+    channels: List[SourceType] = Field(
+        ...,
+        description="List of channels to search in (from n8n)",
+        examples=[["telegram", "pdf", "calendar"]]
     )
     top_k: Optional[int] = Field(
         default=5,
         ge=1,
         le=20,
         description="Number of results to return"
-    )
-    generate_response: Optional[bool] = Field(
-        default=True,
-        description="Whether to generate LLM response or just return sources"
     )
     
     class Config:
@@ -163,11 +160,7 @@ class SearchResponse(BaseModel):
     )
     results: List[SearchResult] = Field(
         default_factory=list,
-        description="List of search results"
-    )
-    generated_response: Optional[str] = Field(
-        default=None,
-        description="Generated LLM response based on search results"
+        description="List of search results from specified channels"
     )
     subscription_status: Optional[str] = Field(
         default=None,
