@@ -116,7 +116,11 @@ async def process_search_and_send(request: SearchRequest, service, webhook_url: 
         
         # Log results
         if response.success:
-            logger.info(f"Search successful: {len(response.results)} results, {response.processing_time_ms}ms")
+            total_results = (len(response.telegram_results) + len(response.pdf_results) + 
+                           len(response.calendar_results) + len(response.news_results))
+            logger.info(f"Search successful: {total_results} results (telegram: {len(response.telegram_results)}, "
+                       f"pdf: {len(response.pdf_results)}, calendar: {len(response.calendar_results)}, "
+                       f"news: {len(response.news_results)}), {response.processing_time_ms}ms")
         else:
             logger.warning(f"Search failed: {response.error_message}")
         
