@@ -377,7 +377,7 @@ Responde basándote en el contexto proporcionado."""
         try:
             # Use Elasticsearch text search
             response = self.elastic.client.search(
-                index="telegram",
+                index="telegram_threads",
                 body={
                     "query": {
                         "multi_match": {
