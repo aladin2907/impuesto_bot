@@ -127,20 +127,8 @@ class SearchService:
                     error_message="Failed to create session"
                 )
             
-            # Step 3: Generate embedding for query (or mock)
-            print(f"Generating embedding for query: {request.query_text}")
-            if self.llm.chat_model and hasattr(self.llm, 'generate_embedding'):
-                try:
-                    query_vector = self.llm.generate_embedding(request.query_text)
-                    if not query_vector:
-                        raise Exception("No embedding generated")
-                except Exception as e:
-                    print(f"Failed to generate embedding: {e}")
-                    # Fall back to mock embedding
-                    query_vector = [0.1] * 1536
-            else:
-                # Mock embedding vector
-                query_vector = [0.1] * 1536
+            # Step 3: Search directly in Elasticsearch by text query (no embeddings)
+            print(f"Searching in Elasticsearch for: {request.query_text}")
             
             # Step 4: Search in specified channels
             print(f"Searching in channels: {request.channels}")
@@ -177,16 +165,9 @@ class SearchService:
                 
                 search_results.extend(channel_results)
             
-            # Use mock results if no channels specified or no results
+            # If no results, return empty list
             if not search_results:
-                print("No channels specified or no results, using mock")
-                search_results = [
-                    {
-                        'text': f"Información sobre {request.query_text}: Este es un resultado de ejemplo del sistema TuExpertoFiscal.",
-                        'metadata': {'source_type': 'mock', 'category': 'tax_info'},
-                        'score': 0.9
-                    }
-                ]
+                print("No results found in any channel")
             
             # Limit results to top_k
             search_results = search_results[:request.top_k or 5]
@@ -389,59 +370,165 @@ Responde basándote en el contexto proporcionado."""
         }
     
     def _search_telegram(self, query: str) -> List[Dict]:
-        """Search in Telegram channels data"""
-        # Mock implementation - replace with real Telegram search
-        return [
-            {
-                'text': f"Telegram: Encontrado '{query}' en canales de impuestos",
-                'metadata': {'source_type': 'telegram', 'channel': 'tax_channel'},
-                'score': 0.9
-            }
-        ]
+        """Search in Telegram channels data using Elasticsearch"""
+        if not self.elastic.client:
+            return []
+        
+        try:
+            # Use Elasticsearch text search
+            response = self.elastic.client.search(
+                index="telegram",
+                body={
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": ["text", "title"],
+                            "type": "best_fields"
+                        }
+                    }
+                },
+                size=5
+            )
+            
+            results = []
+            for hit in response['hits']['hits']:
+                results.append({
+                    'text': hit['_source'].get('text', ''),
+                    'metadata': hit['_source'].get('metadata', {}),
+                    'score': hit['_score']
+                })
+            return results
+        except Exception as e:
+            print(f"Error searching Telegram: {e}")
+            return []
     
     def _search_pdf(self, query: str) -> List[Dict]:
-        """Search in PDF documents"""
-        # Mock implementation - replace with real PDF search
-        return [
-            {
-                'text': f"PDF: Documento fiscal relacionado con '{query}'",
-                'metadata': {'source_type': 'pdf', 'document': 'tax_law.pdf'},
-                'score': 0.8
-            }
-        ]
+        """Search in PDF documents using Elasticsearch"""
+        if not self.elastic.client:
+            return []
+        
+        try:
+            response = self.elastic.client.search(
+                index="pdf",
+                body={
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": ["text", "title"],
+                            "type": "best_fields"
+                        }
+                    }
+                },
+                size=5
+            )
+            
+            results = []
+            for hit in response['hits']['hits']:
+                results.append({
+                    'text': hit['_source'].get('text', ''),
+                    'metadata': hit['_source'].get('metadata', {}),
+                    'score': hit['_score']
+                })
+            return results
+        except Exception as e:
+            print(f"Error searching PDF: {e}")
+            return []
     
     def _search_calendar(self, query: str) -> List[Dict]:
-        """Search in tax calendar"""
-        # Mock implementation - replace with real calendar search
-        return [
-            {
-                'text': f"Calendario: Fecha límite para '{query}' - 31 de enero",
-                'metadata': {'source_type': 'calendar', 'deadline': '2025-01-31'},
-                'score': 0.95
-            }
-        ]
+        """Search in tax calendar using Elasticsearch"""
+        if not self.elastic.client:
+            return []
+        
+        try:
+            response = self.elastic.client.search(
+                index="calendar",
+                body={
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": ["text", "title", "deadline_date"],
+                            "type": "best_fields"
+                        }
+                    }
+                },
+                size=5
+            )
+            
+            results = []
+            for hit in response['hits']['hits']:
+                results.append({
+                    'text': hit['_source'].get('text', ''),
+                    'metadata': hit['_source'].get('metadata', {}),
+                    'score': hit['_score']
+                })
+            return results
+        except Exception as e:
+            print(f"Error searching Calendar: {e}")
+            return []
     
     def _search_news(self, query: str) -> List[Dict]:
-        """Search in news articles"""
-        # Mock implementation - replace with real news search
-        return [
-            {
-                'text': f"Noticias: Última actualización sobre '{query}'",
-                'metadata': {'source_type': 'news', 'date': '2025-01-15'},
-                'score': 0.7
-            }
-        ]
+        """Search in news articles using Elasticsearch"""
+        if not self.elastic.client:
+            return []
+        
+        try:
+            response = self.elastic.client.search(
+                index="news",
+                body={
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": ["text", "title"],
+                            "type": "best_fields"
+                        }
+                    }
+                },
+                size=5
+            )
+            
+            results = []
+            for hit in response['hits']['hits']:
+                results.append({
+                    'text': hit['_source'].get('text', ''),
+                    'metadata': hit['_source'].get('metadata', {}),
+                    'score': hit['_score']
+                })
+            return results
+        except Exception as e:
+            print(f"Error searching News: {e}")
+            return []
     
     def _search_aeat(self, query: str) -> List[Dict]:
-        """Search in AEAT resources"""
-        # Mock implementation - replace with real AEAT search
-        return [
-            {
-                'text': f"AEAT: Información oficial sobre '{query}'",
-                'metadata': {'source_type': 'aeat', 'official': True},
-                'score': 0.9
-            }
-        ]
+        """Search in AEAT resources using Elasticsearch"""
+        if not self.elastic.client:
+            return []
+        
+        try:
+            response = self.elastic.client.search(
+                index="aeat",
+                body={
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": ["text", "title"],
+                            "type": "best_fields"
+                        }
+                    }
+                },
+                size=5
+            )
+            
+            results = []
+            for hit in response['hits']['hits']:
+                results.append({
+                    'text': hit['_source'].get('text', ''),
+                    'metadata': hit['_source'].get('metadata', {}),
+                    'score': hit['_score']
+                })
+            return results
+        except Exception as e:
+            print(f"Error searching AEAT: {e}")
+            return []
 
     def close(self):
         """Close all service connections"""
