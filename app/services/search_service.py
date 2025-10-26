@@ -377,17 +377,59 @@ Responde basándote en el contexto proporcionado."""
             "search_service_initialized": self.initialized
         }
     
+    def _generate_query_embedding(self, query: str) -> Optional[List[float]]:
+        """Generate embedding for search query"""
+        try:
+            if not self.llm.embeddings_model:
+                print("Embeddings model not available")
+                return None
+            
+            # Generate embedding
+            embedding = self.llm.embeddings_model.embed_query(query)
+            return embedding
+        except Exception as e:
+            print(f"Error generating embedding: {e}")
+            return None
+    
     def _search_telegram(self, query: str) -> List[Dict]:
-        """Search in Telegram channels data using Elasticsearch"""
+        """Search in Telegram channels data using HYBRID search (semantic + keyword)"""
         if not self.elastic.client:
             print("Elasticsearch client not available")
             return []
         
         try:
-            # Use Elasticsearch text search
-            response = self.elastic.client.search(
-                index="telegram_threads",
-                body={
+            # Generate query embedding for semantic search
+            query_embedding = self._generate_query_embedding(query)
+            
+            if query_embedding:
+                # HYBRID SEARCH: Use kNN for semantic + multi_match for keyword
+                search_body = {
+                    "size": 10,
+                    "query": {
+                        "bool": {
+                            "should": [
+                                # Keyword search (BM25)
+                                {
+                                    "multi_match": {
+                                        "query": query,
+                                        "fields": ["content^2", "first_message", "last_message", "topics", "keywords"],
+                                        "type": "best_fields"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "knn": {
+                        "field": "content_embedding",
+                        "query_vector": query_embedding,
+                        "k": 10,
+                        "num_candidates": 50
+                    }
+                }
+            else:
+                # KEYWORD-ONLY SEARCH: fallback if no embeddings
+                search_body = {
+                    "size": 10,
                     "query": {
                         "multi_match": {
                             "query": query,
@@ -395,8 +437,12 @@ Responde basándote en el contexto proporcionado."""
                             "type": "best_fields"
                         }
                     }
-                },
-                size=10  # Return 10 results for Telegram
+                }
+            
+            # Execute search
+            response = self.elastic.client.search(
+                index="telegram_threads",
+                body=search_body
             )
             
             results = []
@@ -421,8 +467,10 @@ Responde basándote en el contexto proporcionado."""
                     'score': hit['_score']
                 })
             
-            print(f"Telegram search returned {len(results)} results")
+            search_type = "hybrid (kNN + keyword)" if query_embedding else "keyword-only"
+            print(f"Telegram {search_type} search returned {len(results)} results")
             return results
+            
         except Exception as e:
             print(f"Error searching Telegram: {e}")
             import traceback
