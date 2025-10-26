@@ -395,7 +395,7 @@ Responde basándote en el contexto proporcionado."""
                         }
                     }
                 },
-                size=5
+                size=10  # Return 10 results for Telegram
             )
             
             results = []
@@ -433,7 +433,7 @@ Responde basándote en el contexto proporcionado."""
                         }
                     }
                 },
-                size=5
+                size=10  # Return 10 results for PDF
             )
             
             results = []
@@ -470,7 +470,7 @@ Responde basándote en el contexto proporcionado."""
                         }
                     }
                 },
-                size=5
+                size=3  # Return 3 results for Calendar
             )
             
             results = []
@@ -507,7 +507,7 @@ Responde basándote en el contexto proporcionado."""
                         }
                     }
                 },
-                size=5
+                size=3  # Return 3 results for News
             )
             
             results = []
