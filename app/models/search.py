@@ -162,10 +162,6 @@ class SearchResponse(BaseModel):
         default=None,
         description="Session ID for this conversation"
     )
-    results: List[SearchResult] = Field(
-        default_factory=list,
-        description="Combined list of search results from all channels"
-    )
     telegram_results: List[SearchResult] = Field(
         default_factory=list,
         description="Results from Telegram channel"
@@ -202,20 +198,22 @@ class SearchResponse(BaseModel):
                 "query_text": "¿Cuándo tengo que presentar el modelo 303?",
                 "user_id": "550e8400-e29b-41d4-a716-446655440000",
                 "session_id": "660e8400-e29b-41d4-a716-446655440001",
-                "results": [
+                "telegram_results": [],
+                "pdf_results": [],
+                "calendar_results": [
                     {
                         "text": "El modelo 303 debe presentarse trimestralmente...",
                         "metadata": {
                             "source_type": "calendar",
-                            "tax_type": "IVA"
+                            "deadline": "2025-01-31"
                         },
                         "score": 0.95,
                         "source_type": "calendar"
                     }
                 ],
-                "generated_response": "El modelo 303 de IVA debe presentarse trimestralmente...",
+                "news_results": [],
                 "subscription_status": "free",
-                "processing_time_ms": 1250
+                "processing_time_ms": 150
             }
         }
 

@@ -138,7 +138,6 @@ class SearchService:
             pdf_results = []
             calendar_results = []
             news_results = []
-            search_results = []  # Combined results from all channels
             
             # Search in each specified channel
             for channel in request.channels:
@@ -146,62 +145,49 @@ class SearchService:
                 
                 if channel == SourceType.TELEGRAM:
                     # Search in Telegram data
-                    channel_results = self._search_telegram(request.query_text)
-                    telegram_results = channel_results
+                    telegram_results = self._search_telegram(request.query_text)
                 elif channel == SourceType.PDF:
                     # Search in PDF documents
-                    channel_results = self._search_pdf(request.query_text)
-                    pdf_results = channel_results
+                    pdf_results = self._search_pdf(request.query_text)
                 elif channel == SourceType.CALENDAR:
                     # Search in tax calendar
-                    channel_results = self._search_calendar(request.query_text)
-                    calendar_results = channel_results
+                    calendar_results = self._search_calendar(request.query_text)
                 elif channel == SourceType.NEWS:
                     # Search in news articles
-                    channel_results = self._search_news(request.query_text)
-                    news_results = channel_results
+                    news_results = self._search_news(request.query_text)
                 elif channel == SourceType.AEAT:
                     # Search in AEAT resources
-                    channel_results = self._search_aeat(request.query_text)
+                    aeat_results = self._search_aeat(request.query_text)
                     # Add AEAT to telegram for now
-                    telegram_results.extend(channel_results)
-                else:
-                    # Skip unknown channels
-                    channel_results = []
-                
-                # Add to combined results
-                search_results.extend(channel_results)
+                    telegram_results.extend(aeat_results)
             
-            # If no results, return empty list
-            if not search_results:
-                print("No results found in any channel")
-            
-            # Limit results to top_k
-            search_results = search_results[:request.top_k or 5]
-            
-            # Convert to SearchResult models
-            results = [
-                SearchResult(
-                    text=result['text'],
-                    metadata=result['metadata'],
-                    score=result['score'],
-                    source_type=result['metadata'].get('source_type')
-                )
-                for result in search_results
-            ]
+            # Log total results found
+            total_results = len(telegram_results) + len(pdf_results) + len(calendar_results) + len(news_results)
+            print(f"Total results found: {total_results} (telegram: {len(telegram_results)}, pdf: {len(pdf_results)}, calendar: {len(calendar_results)}, news: {len(news_results)})")
             
             # Step 5: Skip LLM response generation - return clean search results only
             generated_response = None
             
             # Step 6: Save message to database (or mock if not available)
+            # Convert channel results to dict for saving
+            all_sources = []
+            for r in telegram_results:
+                all_sources.append({**r, 'source_type': 'telegram'})
+            for r in pdf_results:
+                all_sources.append({**r, 'source_type': 'pdf'})
+            for r in calendar_results:
+                all_sources.append({**r, 'source_type': 'calendar'})
+            for r in news_results:
+                all_sources.append({**r, 'source_type': 'news'})
+            
             if self.supabase.connection:
                 self.supabase.save_message(
                     session_id=session_id,
                     user_id=user_id,
                     query_text=request.query_text,
                     response_text=generated_response,
-                    sources=[r.model_dump() for r in results],
-                    is_relevant=len(results) > 0
+                    sources=all_sources,
+                    is_relevant=len(all_sources) > 0
                 )
             else:
                 print("Mock mode: Message not saved to database")
@@ -220,7 +206,6 @@ class SearchService:
                 query_text=request.query_text,
                 user_id=user_id,
                 session_id=session_id,
-                results=results,
                 telegram_results=telegram_search_results,
                 pdf_results=pdf_search_results,
                 calendar_results=calendar_search_results,
