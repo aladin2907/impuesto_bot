@@ -506,6 +506,17 @@ Content-Type: application/json
 
 ## Changelog
 
+### v1.3.0 (2025-10-26) - MULTILINGUAL + CALENDAR
+- 🌍 **NEW**: Поддержка 4 языков (ES, RU, UK, EN)
+- ✅ Query translation для всех индексов
+- ✅ Украинский: пдв→IVA, податок→impuesto, декларація→declaración
+- ✅ Расширенный словарь RU/EN терминов
+- 📅 **NEW**: Tax Calendar интеграция
+- ✅ 28 deadlines проиндексированы (2025 + 2026)
+- ✅ Calendar search с multilingual support
+- 📰 **NEW**: AEAT Petete scraper (ready to use)
+- 📖 Документация: [MULTILINGUAL_SEARCH.md](./MULTILINGUAL_SEARCH.md)
+
 ### v1.2.0 (2025-10-26) - HYBRID SEARCH
 - 🚀 **NEW**: Гибридный поиск (kNN + BM25) для Telegram
 - ✅ Semantic search через OpenAI embeddings (1536 dim)
