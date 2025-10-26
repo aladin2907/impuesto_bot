@@ -138,6 +138,7 @@ class SearchService:
             pdf_results = []
             calendar_results = []
             news_results = []
+            search_results = []  # Combined results from all channels
             
             # Search in each specified channel
             for channel in request.channels:
