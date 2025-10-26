@@ -3,13 +3,14 @@ FastAPI webhook endpoint for N8N integration
 Handles search requests from N8N workflow
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from datetime import datetime
 from typing import Optional, List, Dict, Set, Any
 import logging
 import httpx
+import asyncio
 
 from app.models.search import (
     SearchRequest,
@@ -103,6 +104,34 @@ async def root():
     }
 
 
+async def process_search_and_send(request: SearchRequest, service, webhook_url: str):
+    """
+    Background task: process search and send results to n8n webhook
+    """
+    try:
+        logger.info(f"Background task: processing search for query '{request.query_text}'")
+        
+        # Execute search
+        response = await service.search(request)
+        
+        # Log results
+        if response.success:
+            logger.info(f"Search successful: {len(response.results)} results, {response.processing_time_ms}ms")
+        else:
+            logger.warning(f"Search failed: {response.error_message}")
+        
+        # Send results to n8n webhook
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            webhook_response = await client.post(
+                webhook_url,
+                json=response.model_dump()
+            )
+            logger.info(f"Results sent to webhook: {webhook_response.status_code}")
+            
+    except Exception as e:
+        logger.error(f"Error in background search task: {e}", exc_info=True)
+
+
 @app.get("/health", response_model=HealthCheckResponse, tags=["Health"])
 async def health_check(service = Depends(get_search_service)):
     """
@@ -151,71 +180,73 @@ async def health_check(service = Depends(get_search_service)):
         )
 
 
-@app.post("/search", response_model=SearchResponse, tags=["Search"])
+@app.post("/search", tags=["Search"])
 async def search_endpoint(
     request: SearchRequest,
+    background_tasks: BackgroundTasks,
     service = Depends(get_search_service)
 ):
     """
-    Main search endpoint for N8N integration
+    Main search endpoint for N8N integration - async processing
     
-    Receives list of channels from N8N, searches in specified channels, and returns results.
+    Accepts request, returns 200 OK immediately, then processes search 
+    and sends results to n8n webhook.
     
     **Request Parameters:**
     - **user_context**: User identification (channel_type, channel_user_id, metadata)
     - **query_text**: Search query from user (1-1000 characters)
     - **channels**: List of channels to search in (telegram, pdf, calendar, news, aeat)
     - **top_k**: Number of results to return (1-20, default: 5)
+    - **webhook_url**: n8n webhook URL to send results to (default: n8n.mafiavlc.org)
     
-    **Response:**
-    - **success**: Whether search was successful
-    - **results**: List of search results from specified channels
-    - **user_id**: User UUID in our system
-    - **session_id**: Session UUID for conversation context
-    - **subscription_status**: User's subscription level
-    - **processing_time_ms**: Total processing time
+    **Immediate Response:** 200 OK
+    
+    **Results sent to webhook_url as POST:**
+    ```json
+    {
+      "success": true,
+      "query_text": "...",
+      "results": [...],
+      "processing_time_ms": 123
+    }
+    ```
     
     **Example Request:**
     ```json
     {
       "user_context": {
         "channel_type": "telegram",
-        "channel_user_id": "123456789",
-        "user_metadata": {
-          "username": "john_doe",
-          "first_name": "John"
-        }
+        "channel_user_id": "123456789"
       },
-      "query_text": "¿Cuándo tengo que presentar el modelo 303?",
-      "channels": ["telegram", "calendar", "aeat"],
-      "top_k": 5
+      "query_text": "IRPF declaración",
+      "channels": ["telegram"],
+      "top_k": 3,
+      "webhook_url": "https://n8n.mafiavlc.org/webhook-test/59c06e61-a477-42df-8959-20f056f33189"
     }
     ```
     """
     try:
         logger.info(f"Search request from {request.user_context.channel_type}:{request.user_context.channel_user_id}")
         logger.info(f"Query: {request.query_text}")
+        logger.info(f"Webhook URL: {request.webhook_url}")
         
-        # Execute search
-        response = await service.search(request)
+        # Add background task to process search and send to webhook
+        background_tasks.add_task(process_search_and_send, request, service, request.webhook_url)
         
-        # Log results
-        if response.success:
-            logger.info(f"Search successful: {len(response.results)} results, {response.processing_time_ms}ms")
-        else:
-            logger.warning(f"Search failed: {response.error_message}")
-        
-        return response
+        # Return 200 OK immediately
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "accepted", 
+                "message": "Search request accepted and processing in background",
+                "query": request.query_text,
+                "channels": [str(ch) for ch in request.channels]
+            }
+        )
         
     except Exception as e:
         logger.error(f"Error in search endpoint: {e}", exc_info=True)
-        
-        # Return error response
-        return SearchResponse(
-            success=False,
-            query_text=request.query_text,
-            error_message=f"Internal server error: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 def _build_filters_for_source(base_filters: Optional[SearchFilters], source: SourceType) -> SearchFilters:
