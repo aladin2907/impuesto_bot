@@ -132,7 +132,12 @@ class SearchService:
             
             # Step 4: Search in specified channels
             print(f"Searching in channels: {request.channels}")
-            search_results = []
+            
+            # Initialize results for each channel
+            telegram_results = []
+            pdf_results = []
+            calendar_results = []
+            news_results = []
             
             # Search in each specified channel
             for channel in request.channels:
@@ -141,28 +146,29 @@ class SearchService:
                 if channel == SourceType.TELEGRAM:
                     # Search in Telegram data
                     channel_results = self._search_telegram(request.query_text)
+                    telegram_results = channel_results
                 elif channel == SourceType.PDF:
                     # Search in PDF documents
                     channel_results = self._search_pdf(request.query_text)
+                    pdf_results = channel_results
                 elif channel == SourceType.CALENDAR:
                     # Search in tax calendar
                     channel_results = self._search_calendar(request.query_text)
+                    calendar_results = channel_results
                 elif channel == SourceType.NEWS:
                     # Search in news articles
                     channel_results = self._search_news(request.query_text)
+                    news_results = channel_results
                 elif channel == SourceType.AEAT:
                     # Search in AEAT resources
                     channel_results = self._search_aeat(request.query_text)
+                    # Add AEAT to telegram for now
+                    telegram_results.extend(channel_results)
                 else:
-                    # Mock results for unknown channels
-                    channel_results = [
-                        {
-                            'text': f"Resultado de {channel} para '{request.query_text}': Información relevante encontrada.",
-                            'metadata': {'source_type': channel, 'category': 'tax_info'},
-                            'score': 0.8
-                        }
-                    ]
+                    # Skip unknown channels
+                    channel_results = []
                 
+                # Add to combined results
                 search_results.extend(channel_results)
             
             # If no results, return empty list
@@ -202,12 +208,22 @@ class SearchService:
             # Calculate processing time
             processing_time_ms = int((time.time() - start_time) * 1000)
             
+            # Convert channel-specific results to SearchResult models
+            telegram_search_results = [SearchResult(text=r['text'], metadata=r['metadata'], score=r['score'], source_type=SourceType.TELEGRAM) for r in telegram_results]
+            pdf_search_results = [SearchResult(text=r['text'], metadata=r['metadata'], score=r['score'], source_type=SourceType.PDF) for r in pdf_results]
+            calendar_search_results = [SearchResult(text=r['text'], metadata=r['metadata'], score=r['score'], source_type=SourceType.CALENDAR) for r in calendar_results]
+            news_search_results = [SearchResult(text=r['text'], metadata=r['metadata'], score=r['score'], source_type=SourceType.NEWS) for r in news_results]
+            
             return SearchResponse(
                 success=True,
                 query_text=request.query_text,
                 user_id=user_id,
                 session_id=session_id,
                 results=results,
+                telegram_results=telegram_search_results,
+                pdf_results=pdf_search_results,
+                calendar_results=calendar_search_results,
+                news_results=news_search_results,
                 subscription_status=subscription_status,
                 processing_time_ms=processing_time_ms
             )

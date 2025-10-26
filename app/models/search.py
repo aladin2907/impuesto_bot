@@ -164,7 +164,23 @@ class SearchResponse(BaseModel):
     )
     results: List[SearchResult] = Field(
         default_factory=list,
-        description="List of search results from specified channels"
+        description="Combined list of search results from all channels"
+    )
+    telegram_results: List[SearchResult] = Field(
+        default_factory=list,
+        description="Results from Telegram channel"
+    )
+    pdf_results: List[SearchResult] = Field(
+        default_factory=list,
+        description="Results from PDF documents"
+    )
+    calendar_results: List[SearchResult] = Field(
+        default_factory=list,
+        description="Results from tax calendar"
+    )
+    news_results: List[SearchResult] = Field(
+        default_factory=list,
+        description="Results from news articles"
     )
     subscription_status: Optional[str] = Field(
         default=None,
