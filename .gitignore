@@ -4,6 +4,9 @@
 venv/
 env/
 
+# Server access credentials
+.server_access
+
 # Python
 __pycache__/
 *.pyc

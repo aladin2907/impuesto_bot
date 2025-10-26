@@ -638,21 +638,77 @@ return $json;
 
 ## Примеры curl для тестирования
 
+⚠️ **Важно**: `/search` работает АСИНХРОННО! Сервер вернет `200 accepted`, а результаты придут на webhook.
+
 ### Базовый запрос
 ```bash
-curl -X POST http://localhost:8000/search \
-  -H "Content-Type: application/json" \
-  -d '{"user_context":{"channel_type":"test","channel_user_id":"123"},"query_text":"IVA"}'
-```
-
-### С фильтрами
-```bash
-curl -X POST http://localhost:8000/search \
+curl -X POST http://63.180.170.54/search \
   -H "Content-Type: application/json" \
   -d '{
-    "user_context": {"channel_type":"telegram","channel_user_id":"123"},
+    "user_context": {
+      "channel_type": "telegram",
+      "channel_user_id": "123456789"
+    },
+    "query_text": "Какой размер НДС в Испании?",
+    "channels": ["pdf", "aeat"],
+    "top_k": 5
+  }'
+```
+
+**Ответ (сразу)**:
+```json
+{
+  "status": "accepted",
+  "message": "Search request accepted and processing in background",
+  "query": "Какой размер НДС в Испании?",
+  "channels": ["pdf", "aeat"]
+}
+```
+
+**Результаты (придут на webhook)**:
+```json
+{
+  "success": true,
+  "query_text": "Какой размер НДС в Испании?",
+  "telegram_results": [],
+  "pdf_results": [...],
+  "calendar_results": [],
+  "news_results": []
+}
+```
+
+### Поиск по всем каналам
+```bash
+curl -X POST http://63.180.170.54/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_context": {
+      "channel_type": "telegram",
+      "channel_user_id": "7147294726",
+      "user_metadata": {
+        "username": "VadymNahornyi",
+        "first_name": "Vadim"
+      }
+    },
     "query_text": "modelo 303",
-    "filters": {"source_types": ["calendar"], "tax_types": ["IVA"]},
+    "channels": ["telegram", "pdf", "calendar", "news", "aeat"],
+    "top_k": 5,
+    "webhook_url": "https://n8n.mafiavlc.org/webhook/59c06e61-a477-42df-8959-20f056f33189"
+  }'
+```
+
+### Продолжение диалога
+```bash
+curl -X POST http://63.180.170.54/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_context": {
+      "channel_type": "telegram",
+      "channel_user_id": "7147294726",
+      "session_id": "existing-session-uuid-here"
+    },
+    "query_text": "А для автономос?",
+    "channels": ["pdf", "aeat"],
     "top_k": 3
   }'
 ```

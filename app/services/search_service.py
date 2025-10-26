@@ -380,6 +380,7 @@ Responde basándote en el contexto proporcionado."""
     def _search_telegram(self, query: str) -> List[Dict]:
         """Search in Telegram channels data using Elasticsearch"""
         if not self.elastic.client:
+            print("Elasticsearch client not available")
             return []
         
         try:
@@ -390,7 +391,7 @@ Responde basándote en el contexto proporcionado."""
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["content", "first_message", "last_message", "keywords"],
+                            "fields": ["content^2", "first_message", "last_message", "topics", "keywords"],
                             "type": "best_fields"
                         }
                     }
@@ -401,24 +402,37 @@ Responde basándote en el contexto proporcionado."""
             results = []
             for hit in response['hits']['hits']:
                 source = hit['_source']
+                # Get content text
+                text = source.get('content', '')
+                if not text:
+                    text = source.get('first_message', '')
+                
                 results.append({
-                    'text': source.get('content', '') or source.get('first_message', ''),
+                    'text': text,
                     'metadata': {
+                        'thread_id': source.get('thread_id'),
                         'group_name': source.get('group_name'),
                         'group_type': source.get('group_type'),
+                        'message_count': source.get('message_count'),
                         'topics': source.get('topics', []),
-                        'keywords': source.get('keywords', [])
+                        'keywords': source.get('keywords', []),
+                        'quality_score': source.get('quality_score', 0)
                     },
                     'score': hit['_score']
                 })
+            
+            print(f"Telegram search returned {len(results)} results")
             return results
         except Exception as e:
             print(f"Error searching Telegram: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
     def _search_pdf(self, query: str) -> List[Dict]:
         """Search in PDF documents using Elasticsearch"""
         if not self.elastic.client:
+            print("Elasticsearch client not available")
             return []
         
         try:
@@ -428,7 +442,7 @@ Responde basándote en el contexto proporcionado."""
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["text", "title", "content"],
+                            "fields": ["content^2", "document_title", "categories"],
                             "type": "best_fields"
                         }
                     }
@@ -439,23 +453,35 @@ Responde basándote en el contexto proporcionado."""
             results = []
             for hit in response['hits']['hits']:
                 source = hit['_source']
+                # Get content text (truncate if too long)
+                text = source.get('content', '')[:500]  # First 500 chars
+                
                 results.append({
-                    'text': source.get('text', '') or source.get('content', ''),
+                    'text': text,
                     'metadata': {
-                        'filename': source.get('filename'),
-                        'source_type': 'pdf',
-                        'title': source.get('title', '')
+                        'document_id': source.get('document_id'),
+                        'document_title': source.get('document_title'),
+                        'document_type': source.get('document_type'),
+                        'document_number': source.get('document_number'),
+                        'categories': source.get('categories', []),
+                        'chunk_index': source.get('chunk_index'),
+                        'source': source.get('source')
                     },
                     'score': hit['_score']
                 })
+            
+            print(f"PDF search returned {len(results)} results")
             return results
         except Exception as e:
             print(f"Error searching PDF: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
     def _search_calendar(self, query: str) -> List[Dict]:
         """Search in tax calendar using Elasticsearch"""
         if not self.elastic.client:
+            print("Elasticsearch client not available")
             return []
         
         try:
@@ -465,34 +491,40 @@ Responde basándote en el contexto proporcionado."""
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["text", "title", "deadline_date", "description"],
+                            "fields": ["description", "tax_type", "deadline_date"],
                             "type": "best_fields"
                         }
                     }
                 },
-                size=3  # Return 3 results for Calendar
+                size=5  # Return 5 results for Calendar
             )
             
             results = []
             for hit in response['hits']['hits']:
                 source = hit['_source']
                 results.append({
-                    'text': source.get('text', '') or source.get('description', ''),
+                    'text': source.get('description', 'No description'),
                     'metadata': {
                         'deadline_date': source.get('deadline_date'),
-                        'source_type': 'calendar',
-                        'title': source.get('title', '')
+                        'tax_type': source.get('tax_type'),
+                        'quarter': source.get('quarter'),
+                        'applies_to': source.get('applies_to', [])
                     },
                     'score': hit['_score']
                 })
+            
+            print(f"Calendar search returned {len(results)} results")
             return results
         except Exception as e:
             print(f"Error searching Calendar: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
     def _search_news(self, query: str) -> List[Dict]:
         """Search in news articles using Elasticsearch"""
         if not self.elastic.client:
+            print("Elasticsearch client not available")
             return []
         
         try:
@@ -502,44 +534,53 @@ Responde basándote en el contexto proporcionado."""
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["text", "title", "content"],
+                            "fields": ["content^2", "article_title", "categories"],
                             "type": "best_fields"
                         }
                     }
                 },
-                size=3  # Return 3 results for News
+                size=5  # Return 5 results for News
             )
             
             results = []
             for hit in response['hits']['hits']:
                 source = hit['_source']
+                text = source.get('content', '')[:500]  # First 500 chars
+                
                 results.append({
-                    'text': source.get('text', '') or source.get('content', ''),
+                    'text': text,
                     'metadata': {
-                        'title': source.get('title', ''),
-                        'source_type': 'news',
-                        'date': source.get('date')
+                        'article_title': source.get('article_title'),
+                        'article_url': source.get('article_url'),
+                        'news_source': source.get('news_source'),
+                        'published_at': source.get('published_at'),
+                        'categories': source.get('categories', [])
                     },
                     'score': hit['_score']
                 })
+            
+            print(f"News search returned {len(results)} results")
             return results
         except Exception as e:
             print(f"Error searching News: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
     def _search_aeat(self, query: str) -> List[Dict]:
         """Search in AEAT resources using Elasticsearch"""
         if not self.elastic.client:
+            print("Elasticsearch client not available")
             return []
         
         try:
             response = self.elastic.client.search(
-                index="aeat",
+                index="aeat_resources",
                 body={
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["text", "title"],
+                            "fields": ["content^2", "resource_title", "resource_type", "model_number"],
                             "type": "best_fields"
                         }
                     }
@@ -549,14 +590,27 @@ Responde basándote en el contexto proporcionado."""
             
             results = []
             for hit in response['hits']['hits']:
+                source = hit['_source']
+                text = source.get('content', '')[:500]  # First 500 chars
+                
                 results.append({
-                    'text': hit['_source'].get('text', ''),
-                    'metadata': hit['_source'].get('metadata', {}),
+                    'text': text,
+                    'metadata': {
+                        'resource_title': source.get('resource_title'),
+                        'resource_url': source.get('resource_url'),
+                        'resource_type': source.get('resource_type'),
+                        'model_number': source.get('model_number'),
+                        'categories': source.get('categories', [])
+                    },
                     'score': hit['_score']
                 })
+            
+            print(f"AEAT search returned {len(results)} results")
             return results
         except Exception as e:
             print(f"Error searching AEAT: {e}")
+            import traceback
+            traceback.print_exc()
             return []
 
     def close(self):
