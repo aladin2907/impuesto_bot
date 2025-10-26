@@ -80,7 +80,13 @@ class SearchService:
                 )
             
             # Step 1: Get or create user (or mock)
-            telegram_id = int(request.user_context.channel_user_id)
+            # Handle both numeric and string user IDs
+            try:
+                telegram_id = int(request.user_context.channel_user_id)
+            except (ValueError, TypeError):
+                # If user_id is not numeric, use a hash
+                telegram_id = hash(request.user_context.channel_user_id) % 10**9
+            
             user_metadata = request.user_context.user_metadata or {}
             
             if self.supabase.connection:
