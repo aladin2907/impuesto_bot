@@ -477,19 +477,68 @@ Responde basándote en el contexto proporcionado."""
             traceback.print_exc()
             return []
     
+    def _translate_query(self, query: str) -> str:
+        """
+        Translate Russian/English queries to Spanish for better PDF search
+        Uses simple keyword mapping for common tax terms
+        """
+        try:
+            # Common tax terms mapping
+            translations = {
+                # Russian
+                'ндс': 'IVA',
+                'налог': 'impuesto',
+                'налоги': 'impuestos',
+                'автономо': 'autónomo',
+                'доход': 'renta',
+                'компания': 'sociedad',
+                'декларация': 'declaración',
+                'размер': 'tipo',
+                'ставка': 'tipo',
+                # English
+                'vat': 'IVA',
+                'tax': 'impuesto',
+                'taxes': 'impuestos',
+                'income': 'renta',
+                'company': 'sociedad',
+                'rate': 'tipo'
+            }
+            
+            # Detect if needs translation
+            has_cyrillic = any('\u0400' <= c <= '\u04FF' for c in query)
+            query_lower = query.lower()
+            
+            if has_cyrillic or any(en_term in query_lower for en_term in ['vat', 'tax', 'income']):
+                translated = query_lower
+                for term, translation in translations.items():
+                    translated = translated.replace(term, translation)
+                
+                if translated != query_lower:
+                    print(f"📝 Query translated: '{query}' → '{translated}'")
+                    return translated
+            
+            return query
+            
+        except Exception as e:
+            print(f"Translation error: {e}")
+            return query
+    
     def _search_pdf(self, query: str) -> List[Dict]:
-        """Search in PDF documents using Elasticsearch"""
+        """Search in PDF documents using Elasticsearch with multilingual support"""
         if not self.elastic.client:
             print("Elasticsearch client not available")
             return []
         
         try:
+            # Translate query for Spanish documents
+            search_query = self._translate_query(query)
+            
             response = self.elastic.client.search(
                 index="pdf_documents",
                 body={
                     "query": {
                         "multi_match": {
-                            "query": query,
+                            "query": search_query,
                             "fields": ["content^2", "document_title", "categories"],
                             "type": "best_fields"
                         }
@@ -622,6 +671,12 @@ Responde basándote en el contexto proporcionado."""
             return []
         
         try:
+            # Check if index exists
+            from elasticsearch import NotFoundError
+            if not self.elastic.client.indices.exists(index="aeat_resources"):
+                print("⚠️ aeat_resources index does not exist, skipping")
+                return []
+            
             response = self.elastic.client.search(
                 index="aeat_resources",
                 body={
@@ -655,6 +710,9 @@ Responde basándote en el contexto proporcionado."""
             
             print(f"AEAT search returned {len(results)} results")
             return results
+        except NotFoundError:
+            print("⚠️ aeat_resources index not found")
+            return []
         except Exception as e:
             print(f"Error searching AEAT: {e}")
             import traceback
