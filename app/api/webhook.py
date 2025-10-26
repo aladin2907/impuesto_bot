@@ -221,7 +221,7 @@ async def search_endpoint(
       "query_text": "IRPF declaración",
       "channels": ["telegram"],
       "top_k": 3,
-      "webhook_url": "https://n8n.mafiavlc.org/webhook-test/59c06e61-a477-42df-8959-20f056f33189"
+      "webhook_url": "https://n8n.mafiavlc.org/webhook/59c06e61-a477-42df-8959-20f056f33189"
     }
     ```
     """

@@ -97,7 +97,7 @@ class SearchRequest(BaseModel):
         description="Number of results to return"
     )
     webhook_url: str = Field(
-        default="https://n8n.mafiavlc.org/webhook-test/59c06e61-a477-42df-8959-20f056f33189",
+        default="https://n8n.mafiavlc.org/webhook/59c06e61-a477-42df-8959-20f056f33189",
         description="n8n webhook URL to send results to"
     )
     
