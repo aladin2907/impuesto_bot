@@ -382,7 +382,7 @@ Responde basándote en el contexto proporcionado."""
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["text", "title"],
+                            "fields": ["content", "first_message", "last_message", "keywords"],
                             "type": "best_fields"
                         }
                     }
@@ -392,9 +392,15 @@ Responde basándote en el contexto proporcionado."""
             
             results = []
             for hit in response['hits']['hits']:
+                source = hit['_source']
                 results.append({
-                    'text': hit['_source'].get('text', ''),
-                    'metadata': hit['_source'].get('metadata', {}),
+                    'text': source.get('content', '') or source.get('first_message', ''),
+                    'metadata': {
+                        'group_name': source.get('group_name'),
+                        'group_type': source.get('group_type'),
+                        'topics': source.get('topics', []),
+                        'keywords': source.get('keywords', [])
+                    },
                     'score': hit['_score']
                 })
             return results
