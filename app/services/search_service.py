@@ -479,13 +479,13 @@ Responde basándote en el contexto proporcionado."""
     
     def _translate_query(self, query: str) -> str:
         """
-        Translate Russian/English queries to Spanish for better PDF search
-        Uses simple keyword mapping for common tax terms
+        Translate Russian/Ukrainian/English queries to Spanish
+        Supports 4 languages: ES (native), RU, UK, EN
         """
         try:
-            # Common tax terms mapping
+            # Common tax terms mapping (4 languages → Spanish)
             translations = {
-                # Russian
+                # Russian (Русский)
                 'ндс': 'IVA',
                 'налог': 'impuesto',
                 'налоги': 'impuestos',
@@ -495,20 +495,46 @@ Responde basándote en el contexto proporcionado."""
                 'декларация': 'declaración',
                 'размер': 'tipo',
                 'ставка': 'tipo',
+                'процент': 'porcentaje',
+                'оплата': 'pago',
+                'срок': 'plazo',
+                # Ukrainian (Українська)
+                'пдв': 'IVA',
+                'податок': 'impuesto',
+                'податки': 'impuestos',
+                'автономо': 'autónomo',
+                'дохід': 'renta',
+                'доходи': 'renta',
+                'компанія': 'sociedad',
+                'декларація': 'declaración',
+                'розмір': 'tipo',
+                'ставка': 'tipo',
+                'відсоток': 'porcentaje',
+                'оплата': 'pago',
+                'термін': 'plazo',
                 # English
                 'vat': 'IVA',
                 'tax': 'impuesto',
                 'taxes': 'impuestos',
+                'self-employed': 'autónomo',
                 'income': 'renta',
                 'company': 'sociedad',
-                'rate': 'tipo'
+                'declaration': 'declaración',
+                'rate': 'tipo',
+                'percentage': 'porcentaje',
+                'payment': 'pago',
+                'deadline': 'plazo'
             }
             
-            # Detect if needs translation
+            # Detect if needs translation (Cyrillic = Russian or Ukrainian)
             has_cyrillic = any('\u0400' <= c <= '\u04FF' for c in query)
             query_lower = query.lower()
             
-            if has_cyrillic or any(en_term in query_lower for en_term in ['vat', 'tax', 'income']):
+            # Check for English terms
+            english_terms = ['vat', 'tax', 'income', 'self-employed', 'company', 'deadline']
+            has_english = any(term in query_lower for term in english_terms)
+            
+            if has_cyrillic or has_english:
                 translated = query_lower
                 for term, translation in translations.items():
                     translated = translated.replace(term, translation)
@@ -576,19 +602,22 @@ Responde basándote en el contexto proporcionado."""
             return []
     
     def _search_calendar(self, query: str) -> List[Dict]:
-        """Search in tax calendar using Elasticsearch"""
+        """Search in tax calendar using Elasticsearch with multilingual support"""
         if not self.elastic.client:
             print("Elasticsearch client not available")
             return []
         
         try:
+            # Translate query for better results
+            search_query = self._translate_query(query)
+            
             response = self.elastic.client.search(
                 index="calendar_deadlines",
                 body={
                     "query": {
                         "multi_match": {
-                            "query": query,
-                            "fields": ["description", "tax_type", "deadline_date"],
+                            "query": search_query,
+                            "fields": ["description^2", "tax_type", "tax_model", "penalty_for_late"],
                             "type": "best_fields"
                         }
                     }
@@ -599,13 +628,19 @@ Responde basándote en el contexto proporcionado."""
             results = []
             for hit in response['hits']['hits']:
                 source = hit['_source']
+                # Format deadline info
+                deadline_text = f"{source.get('description', 'No description')} (Plazo: {source.get('deadline_date')})"
+                
                 results.append({
-                    'text': source.get('description', 'No description'),
+                    'text': deadline_text,
                     'metadata': {
                         'deadline_date': source.get('deadline_date'),
                         'tax_type': source.get('tax_type'),
+                        'tax_model': source.get('tax_model'),
                         'quarter': source.get('quarter'),
-                        'applies_to': source.get('applies_to', [])
+                        'applies_to': source.get('applies_to', []),
+                        'payment_required': source.get('payment_required'),
+                        'declaration_required': source.get('declaration_required')
                     },
                     'score': hit['_score']
                 })
