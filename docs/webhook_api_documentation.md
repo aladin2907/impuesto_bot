@@ -506,7 +506,16 @@ Content-Type: application/json
 
 ## Changelog
 
-### v1.1.0 (2025-10-26) - АКТУАЛЬНАЯ ВЕРСИЯ
+### v1.2.0 (2025-10-26) - HYBRID SEARCH
+- 🚀 **NEW**: Гибридный поиск (kNN + BM25) для Telegram
+- ✅ Semantic search через OpenAI embeddings (1536 dim)
+- ✅ Комбинирование kNN (semantic) + multi_match (keyword)
+- ✅ Scores выше (20-25 vs 9-10)
+- ✅ Автоматический fallback на keyword-only
+- ⚠️ Требует OpenAI API key для embeddings
+- 📖 Документация: [HYBRID_SEARCH.md](./HYBRID_SEARCH.md)
+
+### v1.1.0 (2025-10-26) - DOCUMENTATION FIX
 - 🔥 **ИСПРАВЛЕНО**: Документация приведена в соответствие с реальной реализацией
 - ✅ Асинхронная обработка `/search` с callback на N8N webhook
 - ✅ Параметр `channels` вместо `filters.source_types`
@@ -519,7 +528,7 @@ Content-Type: application/json
 ### v1.0.0 (2025-10-08)
 - ✅ Основной search endpoint
 - ✅ Health check endpoint  
-- ✅ Гибридный поиск (semantic + keyword)
+- ✅ Keyword search (BM25)
 - ✅ Управление сессиями и пользователями
 - ✅ Swagger документация
 
