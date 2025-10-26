@@ -415,12 +415,12 @@ Responde basándote en el contexto proporcionado."""
         
         try:
             response = self.elastic.client.search(
-                index="pdf",
+                index="pdf_documents",
                 body={
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["text", "title"],
+                            "fields": ["text", "title", "content"],
                             "type": "best_fields"
                         }
                     }
@@ -430,9 +430,14 @@ Responde basándote en el contexto proporcionado."""
             
             results = []
             for hit in response['hits']['hits']:
+                source = hit['_source']
                 results.append({
-                    'text': hit['_source'].get('text', ''),
-                    'metadata': hit['_source'].get('metadata', {}),
+                    'text': source.get('text', '') or source.get('content', ''),
+                    'metadata': {
+                        'filename': source.get('filename'),
+                        'source_type': 'pdf',
+                        'title': source.get('title', '')
+                    },
                     'score': hit['_score']
                 })
             return results
@@ -447,12 +452,12 @@ Responde basándote en el contexto proporcionado."""
         
         try:
             response = self.elastic.client.search(
-                index="calendar",
+                index="calendar_deadlines",
                 body={
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["text", "title", "deadline_date"],
+                            "fields": ["text", "title", "deadline_date", "description"],
                             "type": "best_fields"
                         }
                     }
@@ -462,9 +467,14 @@ Responde basándote en el contexto proporcionado."""
             
             results = []
             for hit in response['hits']['hits']:
+                source = hit['_source']
                 results.append({
-                    'text': hit['_source'].get('text', ''),
-                    'metadata': hit['_source'].get('metadata', {}),
+                    'text': source.get('text', '') or source.get('description', ''),
+                    'metadata': {
+                        'deadline_date': source.get('deadline_date'),
+                        'source_type': 'calendar',
+                        'title': source.get('title', '')
+                    },
                     'score': hit['_score']
                 })
             return results
@@ -479,12 +489,12 @@ Responde basándote en el contexto proporcionado."""
         
         try:
             response = self.elastic.client.search(
-                index="news",
+                index="news_articles",
                 body={
                     "query": {
                         "multi_match": {
                             "query": query,
-                            "fields": ["text", "title"],
+                            "fields": ["text", "title", "content"],
                             "type": "best_fields"
                         }
                     }
@@ -494,9 +504,14 @@ Responde basándote en el contexto proporcionado."""
             
             results = []
             for hit in response['hits']['hits']:
+                source = hit['_source']
                 results.append({
-                    'text': hit['_source'].get('text', ''),
-                    'metadata': hit['_source'].get('metadata', {}),
+                    'text': source.get('text', '') or source.get('content', ''),
+                    'metadata': {
+                        'title': source.get('title', ''),
+                        'source_type': 'news',
+                        'date': source.get('date')
+                    },
                     'score': hit['_score']
                 })
             return results
