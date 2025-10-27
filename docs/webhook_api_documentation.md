@@ -506,6 +506,16 @@ Content-Type: application/json
 
 ## Changelog
 
+### v1.4.0 (2025-10-27) - PDF HYBRID SEARCH 🚀
+- 🎯 **NEW**: PDF Hybrid Search (semantic + keyword + translation)
+- ✅ 4,051 PDF documents с embeddings (1536 dim)
+- ✅ kNN semantic search через OpenAI
+- ✅ Triple power: kNN + BM25 + translation
+- ✅ Coverage: 100% PDF documents
+- ⚡ Search time: ~2.5s (embedding 1.4s + kNN 0.85s)
+- 💰 Cost: ~$0.41 для генерации всех embeddings
+- 📖 Script: `scripts/ingestion/add_pdf_embeddings.py`
+
 ### v1.3.0 (2025-10-26) - MULTILINGUAL + CALENDAR
 - 🌍 **NEW**: Поддержка 4 языков (ES, RU, UK, EN)
 - ✅ Query translation для всех индексов
