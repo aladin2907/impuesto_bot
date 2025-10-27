@@ -171,7 +171,7 @@ def index_reference_materials():
 if __name__ == "__main__":
     print("🚀 Starting reference materials indexing...")
     print(f"📁 Project root: {project_root}")
-    print(f"🔧 Elasticsearch URL: {settings.ELASTICSEARCH_URL}")
+    print(f"🔧 Elasticsearch Cloud ID: {settings.ELASTIC_CLOUD_ID[:20]}...")
     print()
     
     success = index_reference_materials()
