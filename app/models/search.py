@@ -16,7 +16,6 @@ class SourceType(str, Enum):
     NEWS = "news"
     AEAT = "aeat"
     REGIONAL = "regional"
-    REFERENCE = "reference"
     ALL = "all"
 
 
@@ -178,10 +177,6 @@ class SearchResponse(BaseModel):
     news_results: List[SearchResult] = Field(
         default_factory=list,
         description="Results from news articles"
-    )
-    reference_results: List[SearchResult] = Field(
-        default_factory=list,
-        description="Results from reference materials (tax rates, guides, FAQs)"
     )
     subscription_status: Optional[str] = Field(
         default=None,

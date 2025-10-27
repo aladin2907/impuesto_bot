@@ -51,8 +51,6 @@ Thumbs.db
 
 # Data (already in databases)
 data/
-# EXCEPT reference materials (needed for indexing)
-!data/reference_materials/
 
 # Logs
 logs/
