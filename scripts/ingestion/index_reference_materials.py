@@ -15,19 +15,23 @@ sys.path.insert(0, str(project_root))
 
 from app.config.settings import settings
 from app.services.elasticsearch_service import elastic_service
-from app.services.llm.openai_service import openai_service
+from app.services.llm.llm_service import llm_service
 
 
 def generate_embedding(text: str) -> list:
-    """Generate OpenAI embedding for text"""
+    """Generate embedding for text using LLM service"""
     try:
-        response = openai_service.client.embeddings.create(
-            model="text-embedding-3-small",
-            input=text
-        )
-        return response.data[0].embedding
+        # Initialize LLM service if needed
+        if not llm_service.initialized:
+            llm_service.initialize()
+        
+        # Generate embedding
+        embedding = llm_service.generate_embedding(text)
+        return embedding
     except Exception as e:
         print(f"Error generating embedding: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 
