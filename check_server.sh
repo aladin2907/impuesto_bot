@@ -52,3 +52,4 @@ echo "  cd /root/impuesto_bot"
 echo "  ./scripts/fix_server_connections.sh"
 echo ""
 
+
