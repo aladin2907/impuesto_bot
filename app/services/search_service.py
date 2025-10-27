@@ -392,52 +392,32 @@ Responde basándote en el contexto proporcionado."""
             return None
     
     def _search_telegram(self, query: str) -> List[Dict]:
-        """Search in Telegram channels data using HYBRID search (semantic + keyword)"""
+        """
+        Search in Telegram channels data using HYBRID search (semantic + keyword)
+        
+        NOTE: Telegram uses telegram_embedding (1024 dims, multilingual-e5-large)
+              Different from PDF which uses content_embedding (1536 dims, OpenAI)
+        """
         if not self.elastic.client:
             print("Elasticsearch client not available")
             return []
         
         try:
-            # Generate query embedding for semantic search
-            query_embedding = self._generate_query_embedding(query)
+            # For now, use KEYWORD-ONLY search for Telegram
+            # TODO: Add multilingual-e5-large model for query embeddings
+            # Issue: OpenAI embeddings (1536) incompatible with multilingual-e5 (1024)
             
-            if query_embedding:
-                # HYBRID SEARCH: Use kNN for semantic + multi_match for keyword
-                search_body = {
-                    "size": 10,
-                    "query": {
-                        "bool": {
-                            "should": [
-                                # Keyword search (BM25)
-                                {
-                                    "multi_match": {
-                                        "query": query,
-                                        "fields": ["content^2", "first_message", "last_message", "topics", "keywords"],
-                                        "type": "best_fields"
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "knn": {
-                        "field": "content_embedding",
-                        "query_vector": query_embedding,
-                        "k": 10,
-                        "num_candidates": 50
+            # KEYWORD SEARCH ONLY (BM25)
+            search_body = {
+                "size": 10,
+                "query": {
+                    "multi_match": {
+                        "query": query,
+                        "fields": ["content^2", "first_message", "last_message", "topics", "keywords"],
+                        "type": "best_fields"
                     }
                 }
-            else:
-                # KEYWORD-ONLY SEARCH: fallback if no embeddings
-                search_body = {
-                    "size": 10,
-                    "query": {
-                        "multi_match": {
-                            "query": query,
-                            "fields": ["content^2", "first_message", "last_message", "topics", "keywords"],
-                            "type": "best_fields"
-                        }
-                    }
-                }
+            }
             
             # Execute search
             response = self.elastic.client.search(

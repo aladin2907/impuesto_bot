@@ -10,6 +10,7 @@ langchain-community
 elasticsearch
 psycopg2-binary
 python-dotenv
+sentence-transformers  # FREE embeddings for Telegram (multilingual-e5-large)
 aiogram
 telethon
 beautifulsoup4
