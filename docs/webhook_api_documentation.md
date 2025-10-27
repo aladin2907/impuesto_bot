@@ -92,7 +92,7 @@ curl -X POST http://63.180.170.54/search \
     "session_id": "optional-existing-session-uuid"
   },
   "query_text": "Какой размер НДС в Испании?",
-  "channels": ["pdf", "aeat", "telegram", "calendar", "news"],
+  "channels": ["reference", "pdf", "aeat", "telegram", "calendar", "news"],
   "top_k": 5,
   "webhook_url": "https://n8n.mafiavlc.org/webhook/59c06e61-a477-42df-8959-20f056f33189"
 }
@@ -108,7 +108,7 @@ curl -X POST http://63.180.170.54/search \
 | `user_context.user_metadata` | object | Нет | Доп. метаданные (username, first_name, etc.) |
 | `user_context.session_id` | string | Нет | ID существующей сессии (для продолжения диалога) |
 | `query_text` | string | Да | Текст запроса (1-1000 символов) |
-| `channels` | array | Да | Список каналов для поиска: ["telegram", "pdf", "calendar", "news", "aeat"] |
+| `channels` | array | Да | Список каналов для поиска: ["telegram", "pdf", "calendar", "news", "aeat", "reference"] |
 | `top_k` | integer | Нет | Количество результатов (1-20, default: 5) |
 | `webhook_url` | string | Нет | URL N8N webhook для отправки результатов (default: https://n8n.mafiavlc.org/webhook/59c06e61-a477-42df-8959-20f056f33189) |
 
@@ -157,6 +157,7 @@ curl -X POST http://63.180.170.54/search \
   ],
   "calendar_results": [],
   "news_results": [],
+  "reference_results": [],
   "subscription_status": "free",
   "error_message": null,
   "processing_time_ms": 515
@@ -175,6 +176,7 @@ curl -X POST http://63.180.170.54/search \
 | `pdf_results` | array | Результаты из PDF документов |
 | `calendar_results` | array | Результаты из налогового календаря |
 | `news_results` | array | Результаты из новостей |
+| `reference_results` | array | **NEW!** Результаты из справочных материалов (ставки, гайды) |
 | `subscription_status` | string | Статус подписки (free, premium) |
 | `error_message` | string\|null | Сообщение об ошибке (если success=false) |
 | `processing_time_ms` | integer | Время обработки в миллисекундах |
@@ -260,7 +262,8 @@ Method: POST
   "telegram_results": [...],
   "pdf_results": [...],
   "calendar_results": [...],
-  "news_results": [...]
+  "news_results": [...],
+  "reference_results": [...]
 }
 ```
 
@@ -357,6 +360,7 @@ Method: POST
 | `calendar` | Налоговый календарь AEAT (дедлайны, сроки) | `calendar_deadlines` |
 | `news` | Новостные статьи (Cinco Días, Expansión) | `news_articles` |
 | `aeat` | Ресурсы AEAT (формы, инструкции, FAQ) | `aeat` |
+| `reference` | **NEW!** Справочные материалы (ставки IVA/IRPF, гайды) | `reference_materials` |
 
 **Пример**: `"channels": ["pdf", "aeat", "telegram"]`
 
@@ -461,12 +465,13 @@ GET http://63.180.170.54/health
 Всегда проверяйте результаты в callback:
 
 ```javascript
-const { telegram_results, pdf_results, calendar_results, news_results } = $json.body;
+const { telegram_results, pdf_results, calendar_results, news_results, reference_results } = $json.body;
 const totalResults = 
   telegram_results.length + 
   pdf_results.length + 
   calendar_results.length + 
-  news_results.length;
+  news_results.length +
+  (reference_results?.length || 0);
 
 if (totalResults === 0) {
   return {
@@ -505,6 +510,18 @@ Content-Type: application/json
 ---
 
 ## Changelog
+
+### v1.5.0 (2025-10-27) - REFERENCE MATERIALS 📚
+- 📚 **NEW**: Reference Materials channel (`reference`)
+- ✅ 10 справочных документов с конкретными данными
+- 📊 IVA rates: 21% (general), 10% (reducido), 4% (superreducido)
+- 💰 IRPF brackets: 19% - 47% progressive scale
+- 📝 Practical guides: Modelo 303, 130, autonomo taxes
+- 🚀 Hybrid search: kNN + keyword + translation
+- 🎯 Идеально для вопросов: "Какой размер НДС?", "Когда подавать 303?"
+- 📖 Data: `data/reference_materials/tax_reference_data.json`
+- 🔧 Script: `scripts/ingestion/index_reference_materials.py`
+- 💡 Index: `reference_materials` (10 docs)
 
 ### v1.4.0 (2025-10-27) - PDF HYBRID SEARCH 🚀
 - 🎯 **NEW**: PDF Hybrid Search (semantic + keyword + translation)
