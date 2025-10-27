@@ -1,0 +1,120 @@
+{
+  "source": "AEAT Reference Materials",
+  "source_url": "https://sede.agenciatributaria.gob.es/",
+  "created_at": "2025-10-27",
+  "language": "es",
+  "categories": ["IVA", "IRPF", "Sociedades", "Autónomos"],
+  "reference_materials": [
+    {
+      "id": "iva_rates_2024",
+      "title": "Tipos impositivos del IVA en España 2024",
+      "category": "IVA",
+      "subcategory": "Tipos y tarifas",
+      "content": "Los tipos del IVA vigentes en España son:\n\n1. Tipo General: 21%\nSe aplica por defecto a todos los bienes y servicios que no estén incluidos expresamente en los otros tipos. Ejemplos: ropa, electrónica, servicios profesionales, restauración (excepto comida para llevar).\n\n2. Tipo Reducido: 10%\nSe aplica a: alimentos básicos (pan, leche, huevos, frutas, verduras, cereales), transporte de viajeros, servicios de hostelería y restauración (comida para llevar), entradas a espectáculos culturales, vivienda (compraventa y alquiler bajo condiciones), medicamentos para uso veterinario.\n\n3. Tipo Superreducido: 4%\nSe aplica a: pan común, leche, huevos, frutas, verduras, cereales, quesos, libros, periódicos y revistas (sin publicidad), medicamentos para uso humano, vivienda de protección oficial (primera entrega), prótesis, ortesis y vehículos para personas con discapacidad.\n\nEstos tipos están vigentes desde septiembre de 2012 y se aplican en territorio peninsular español y Baleares. En Canarias se aplica el IGIC, en Ceuta y Melilla el IPSI.",
+      "keywords": ["IVA", "tipos", "21", "10", "4", "general", "reducido", "superreducido", "porcentaje", "tasa"],
+      "applies_to": ["empresas", "autonomos", "particulares"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 37/1992"]
+    },
+    {
+      "id": "iva_exemptions",
+      "title": "Operaciones exentas de IVA",
+      "category": "IVA",
+      "subcategory": "Exenciones",
+      "content": "Operaciones exentas de IVA en España:\n\n1. Servicios médicos y sanitarios\n2. Servicios de asistencia social\n3. Servicios educativos y de formación\n4. Servicios financieros y de seguros\n5. Alquiler de viviendas (uso residencial)\n6. Operaciones inmobiliarias (segunda y posteriores transmisiones)\n7. Entregas de bienes destinados a exportación\n8. Entregas intracomunitarias de bienes\n9. Servicios postales públicos\n10. Loterías y apuestas oficiales\n\nEstas operaciones no llevan IVA repercutido, pero tampoco permiten deducir el IVA soportado (salvo exportaciones e intracomunitarias).",
+      "keywords": ["exento", "sin IVA", "exención", "médico", "educación", "alquiler", "vivienda"],
+      "applies_to": ["empresas", "autonomos"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 37/1992", "Artículo 20"]
+    },
+    {
+      "id": "autonomo_taxes_overview",
+      "title": "Impuestos que paga un autónomo en España",
+      "category": "Autónomos",
+      "subcategory": "Obligaciones fiscales",
+      "content": "Un autónomo en España debe pagar los siguientes impuestos:\n\n1. IRPF (Impuesto sobre la Renta de las Personas Físicas)\n- Retenciones trimestrales: Modelo 130 (pago fraccionado)\n- Declaración anual: Modelo 100 (abril-junio)\n- Tipos: Progresivos del 19% al 47% según tramos de renta\n\n2. IVA (Impuesto sobre el Valor Añadido)\n- Declaración trimestral: Modelo 303\n- Resumen anual: Modelo 390\n- Tipos: 21% (general), 10% (reducido), 4% (superreducido)\n\n3. Cotizaciones a la Seguridad Social\n- Base mínima 2024: 950,98€/mes → cuota ~294€/mes\n- Pago mensual obligatorio\n- Incluye: prestaciones por enfermedad, jubilación, cese de actividad\n\n4. Impuestos especiales (si aplica)\n- IAE (Impuesto de Actividades Económicas) - exento primeros 2 años\n- Tasas locales según actividad\n\nTambién obligaciones: libros de registro, facturas, conservación de documentos (4-6 años).",
+      "keywords": ["autónomo", "impuestos", "IRPF", "IVA", "cotización", "Seguridad Social", "modelo 130", "modelo 303"],
+      "applies_to": ["autonomos"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 35/2006", "Ley 37/1992"]
+    },
+    {
+      "id": "irpf_rates_2024",
+      "title": "Tramos del IRPF en España 2024",
+      "category": "IRPF",
+      "subcategory": "Tipos y tarifas",
+      "content": "Escala general del IRPF 2024 (estatal + autonómica):\n\nBase liquidable hasta 12.450€: 19%\nDe 12.450€ a 20.200€: 24%\nDe 20.200€ a 35.200€: 30%\nDe 35.200€ a 60.000€: 37%\nDe 60.000€ a 300.000€: 45%\nMás de 300.000€: 47%\n\nTipo aplicable según rentas (orientativo):\n- 15.000€/año: ~12% efectivo\n- 25.000€/año: ~20% efectivo\n- 40.000€/año: ~26% efectivo\n- 60.000€/año: ~32% efectivo\n- 100.000€/año: ~38% efectivo\n\nRetención mínima autónomos: 15% (primer año actividad: 7%)\n\nReducciones aplicables:\n- Rendimientos del trabajo: 2.000€ - 6.498€\n- Actividades económicas: gastos deducibles\n- Aportaciones a planes de pensiones: hasta 1.500€\n- Cuotas sindicales, colegios profesionales\n\nMínimo personal: 5.550€\nMínimo por descendiente: 2.400€ - 4.500€\nMínimo por ascendiente: 1.150€",
+      "keywords": ["IRPF", "renta", "tramos", "porcentaje", "retención", "declaración", "tipos impositivos"],
+      "applies_to": ["autonomos", "trabajadores", "particulares"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 35/2006"]
+    },
+    {
+      "id": "modelo_303_guide",
+      "title": "Modelo 303 - Autoliquidación del IVA",
+      "category": "IVA",
+      "subcategory": "Modelos y declaraciones",
+      "content": "El Modelo 303 es la declaración trimestral del IVA que deben presentar empresarios y autónomos.\n\nPlazos de presentación 2024:\n- 1T (enero-marzo): hasta 20 de abril\n- 2T (abril-junio): hasta 20 de julio\n- 3T (julio-septiembre): hasta 20 de octubre\n- 4T (octubre-diciembre): hasta 30 de enero 2025\n\nContenido:\n- IVA repercutido: el que cobras a tus clientes\n- IVA soportado: el que pagas a tus proveedores\n- Resultado: diferencia entre ambos\n  * Positivo: a ingresar a Hacienda\n  * Negativo: a compensar en siguientes trimestres\n\nForma de presentación:\n- Obligatorio por internet (Sede Electrónica AEAT)\n- Certificado digital, Cl@ve PIN o DNI electrónico\n- Pago: domiciliación, NRC o cargo en cuenta\n\nSanciones por no presentar:\n- 200€ mínimo por cada declaración\n- Recargos del 5% al 20% según retraso\n- Intereses de demora\n\nExenciones: Régimen simplificado, Régimen especial agricultura, Régimen especial recargo de equivalencia.",
+      "keywords": ["modelo 303", "IVA trimestral", "autoliquidación", "plazo", "declaración", "IVA repercutido", "IVA soportado"],
+      "applies_to": ["empresas", "autonomos"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 37/1992", "Modelo 303"]
+    },
+    {
+      "id": "modelo_130_guide",
+      "title": "Modelo 130 - Pago fraccionado IRPF autónomos",
+      "category": "IRPF",
+      "subcategory": "Modelos y declaraciones",
+      "content": "El Modelo 130 es el pago fraccionado del IRPF para autónomos en estimación directa.\n\nPlazos de presentación 2024:\n- 1T: hasta 22 de abril\n- 2T: hasta 22 de julio\n- 3T: hasta 21 de octubre\n- 4T: hasta 30 de enero 2025\n\n¿Quién debe presentarlo?\n- Autónomos en estimación directa (normal o simplificada)\n- Con ingresos de actividad > 75% del total\n- Si más del 70% lleva retención, exentos del modelo 130\n\nCálculo:\n- Base: ingresos - gastos del trimestre acumulado\n- Porcentaje: 20% de la base\n- Resta: pagos fraccionados anteriores del año\n- Resultado: a ingresar (mínimo 0€)\n\nEjemplo trimestre:\n- Ingresos acumulados: 20.000€\n- Gastos acumulados: 8.000€\n- Base: 12.000€\n- Pago fraccionado 20%: 2.400€\n- Menos pagos anteriores: -1.500€\n- A pagar: 900€\n\nPresentación:\n- Online en Sede Electrónica AEAT\n- Pago: domiciliación o NRC\n\nImportante: Es anticipo del IRPF, no el impuesto final. Se regulariza en la declaración anual (Modelo 100).",
+      "keywords": ["modelo 130", "pago fraccionado", "IRPF trimestral", "autónomo", "estimación directa", "20 por ciento"],
+      "applies_to": ["autonomos"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 35/2006", "Modelo 130"]
+    },
+    {
+      "id": "autonomo_registration_steps",
+      "title": "Cómo darse de alta como autónomo en España",
+      "category": "Autónomos",
+      "subcategory": "Alta y registro",
+      "content": "Pasos para darse de alta como autónomo:\n\n1. Alta en Hacienda (AEAT)\n- Modelo 036 o 037 (declaración censal)\n- Indicar: actividad (IAE), domicilio fiscal, régimen IVA\n- Plazo: antes de iniciar actividad\n- Online en Sede Electrónica AEAT\n- Gratis\n\n2. Alta en Seguridad Social (RETA)\n- Sistema RED (online) o presencial\n- Elegir base de cotización (desde 950,98€/mes)\n- Cuota mensual aproximada: 294€/mes (base mínima)\n- Plazo: 30 días desde inicio actividad\n- Tarifa plana: 80€/mes primeros 12 meses (nuevos autónomos)\n\n3. Comunicación autonómica/local (si aplica)\n- Licencia de actividad (actividades con local)\n- Registro autonómico según sector\n\n4. Apertura cuenta bancaria profesional (recomendado)\n\n5. Gestión de facturas y contabilidad\n- Libro registro de ingresos y gastos\n- Libro registro de facturas emitidas\n- Libro registro de facturas recibidas\n- Libro registro de bienes de inversión\n\nDocumentos necesarios:\n- DNI/NIE\n- Certificado digital o Cl@ve PIN\n- Descripción de la actividad\n- Dirección fiscal\n\nTarifa plana 2024:\n- Meses 1-12: 80€/mes\n- Meses 13-18: 80€/mes (si ingresos < SMI)\n- Meses 19-24: reducción 50%\n- Meses 25-36: reducción 30%",
+      "keywords": ["alta autónomo", "darse de alta", "modelo 036", "RETA", "Seguridad Social", "tarifa plana", "como hacerse autónomo"],
+      "applies_to": ["autonomos"],
+      "last_updated": "2024-01-01",
+      "references": []
+    },
+    {
+      "id": "sociedades_tax_rate",
+      "title": "Impuesto de Sociedades - Tipo impositivo",
+      "category": "Sociedades",
+      "subcategory": "Tipos y tarifas",
+      "content": "Tipos del Impuesto de Sociedades en España 2024:\n\nTipo general: 25%\nAplica a la mayoría de empresas españolas.\n\nTipos reducidos:\n- Entidades de nueva creación (primeros 2 años): 15%\n  * Primer periodo con base positiva y siguiente\n  * Base hasta 300.000€: 15%\n  * Resto de base: 20%\n\n- Cooperativas protegidas: 20%\n- Cooperativas especialmente protegidas: 10%\n\n- Microempresas (cifra negocios < 1M€): 23%\n  * Vigente desde 2023\n  * Primera franja de 50.000€: 23%\n  * Resto: 25%\n\n- Entidades sin fines lucrativos: 10%\n- Fondos de inversión: 1%\n\nPeriodo impositivo:\n- Coincide con ejercicio económico (normalmente año natural)\n- Declaración: Modelo 200\n- Plazo: 25 días siguientes a 6 meses desde cierre ejercicio\n- Para cierre 31/dic: hasta 25 julio año siguiente\n\nPagos fraccionados:\n- Modelo 202 (trimestral)\n- Plazos: abril, octubre, diciembre\n- Anticipo del 18% sobre base imponible\n\nDeducciones aplicables:\n- I+D+i (investigación y desarrollo)\n- Creación de empleo\n- Inversiones medioambientales\n- Producción cinematográfica\n- Reinversión de beneficios extraordinarios",
+      "keywords": ["impuesto sociedades", "25%", "15%", "empresa", "sociedad limitada", "SL", "tipo impositivo", "modelo 200"],
+      "applies_to": ["empresas", "sociedades"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 27/2014"]
+    },
+    {
+      "id": "digital_nomad_visa",
+      "title": "Visado para nómadas digitales en España",
+      "category": "Autónomos",
+      "subcategory": "Visados y permisos",
+      "content": "El visado de nómada digital permite trabajar remotamente en España para empresas extranjeras o como autónomo.\n\nRequisitos:\n- Trabajar remotamente para empresa(s) fuera de España\n- O ser autónomo con clientes principalmente extranjeros\n- Ingresos mínimos: 200% del SMI (2024: ~2.260€/mes)\n- Contrato o demostrar actividad profesional\n- Título universitario o 3 años experiencia\n- Seguro médico privado\n- Antecedentes penales limpios\n\nBeneficios fiscales:\n- IRPF: tipo especial 24% (vs progresivo hasta 47%)\n- Aplica durante 5 años\n- Solo sobre rentas españolas (si aplica régimen especial)\n- Rendimientos de trabajo exterior: exención parcial posible\n\nObligaciones:\n- Alta como autónomo si trabajas para tus propios clientes\n- Declarar ingresos en España si resides >183 días/año\n- Cotizar Seguridad Social (si autónomo)\n- IVA: si servicios a clientes españoles\n\nDuración:\n- Visado inicial: 1 año\n- Renovable hasta 5 años\n- Permiso de residencia: 3 años renovables\n\nFamiliares:\n- Cónyuge e hijos pueden obtener permiso\n- Mismo plazo de validez\n\nSolicitud:\n- Consulado español en país de origen\n- O si ya en España con otro permiso: extranjería\n- Plazo resolución: 3 meses\n- Tasa: ~80€ visado + ~15€ tarjeta\n\nImportante: Beckham Law (régimen especial expatriados) puede aplicar, limitando tributación al 24% sobre rentas españolas y excluyendo rentas extranjeras.",
+      "keywords": ["nómada digital", "digital nomad", "visa", "visado", "trabajar remoto", "autónomo extranjero", "Beckham Law"],
+      "applies_to": ["autonomos", "extranjeros"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 14/2013"]
+    },
+    {
+      "id": "deductible_expenses_autonomo",
+      "title": "Gastos deducibles para autónomos",
+      "category": "Autónomos",
+      "subcategory": "Deducciones y gastos",
+      "content": "Gastos deducibles en IRPF e IVA para autónomos:\n\n1. Suministros (si trabajas desde casa):\n- Luz, agua, gas, internet, teléfono\n- Deducible: proporción uso profesional (normalmente 30%)\n- Necesario: factura a nombre del autónomo\n\n2. Local y alquiler:\n- Alquiler oficina: 100% deducible\n- Alquiler vivienda-oficina: proporción metros uso profesional\n- IBI, comunidad, seguros del local\n\n3. Vehículo:\n- Si afecto 100% a actividad: todos los gastos\n- Si uso mixto: solo gastos cuando trabajas\n- Combustible, seguro, reparaciones, ITV\n- Amortización o renting\n\n4. Material y equipamiento:\n- Ordenadores, impresoras, mobiliario\n- Software y aplicaciones profesionales\n- Herramientas y maquinaria\n- Amortización según tablas oficiales\n\n5. Profesionales externos:\n- Gestoría, asesoría, abogados\n- Subcontrataciones\n- Formación relacionada con la actividad\n\n6. Manutención:\n- Comidas fuera casa por motivos profesionales\n- Máximo deducible: 26,67€/día España, 48,08€/día extranjero\n- Solo IRPF, no IVA\n\n7. Viajes:\n- Hoteles, transporte\n- Relacionados con la actividad\n- Factura a nombre del autónomo\n\n8. Otros:\n- Seguro de responsabilidad civil\n- Cuotas colegios profesionales\n- Material oficina y papelería\n- Publicidad y marketing\n- Página web, hosting\n- Gastos financieros (intereses)\n\nRequisitos:\n- Factura correcta a nombre del autónomo\n- Relacionado con la actividad\n- Justificado y registrado contablemente\n- Conservar documentos 4 años mínimo\n\nNo deducibles:\n- Multas y sanciones\n- Ropa (salvo uniformes)\n- Gastos personales o familiares\n- IRPF propio o cuotas Seguridad Social propias",
+      "keywords": ["gastos deducibles", "deducciones", "autónomo", "facturas", "IVA deducible", "gastos", "qué puedo deducir"],
+      "applies_to": ["autonomos"],
+      "last_updated": "2024-01-01",
+      "references": ["Ley 35/2006"]
+    }
+  ]
+}
+

@@ -144,6 +144,7 @@ class SearchService:
             pdf_results = []
             calendar_results = []
             news_results = []
+            reference_results = []
             
             # Search in each specified channel
             for channel in request.channels:
@@ -166,10 +167,13 @@ class SearchService:
                     aeat_results = self._search_aeat(request.query_text)
                     # Add AEAT to telegram for now
                     telegram_results.extend(aeat_results)
+                elif channel == SourceType.REFERENCE:
+                    # Search in reference materials
+                    reference_results = self._search_reference(request.query_text)
             
             # Log total results found
-            total_results = len(telegram_results) + len(pdf_results) + len(calendar_results) + len(news_results)
-            print(f"Total results found: {total_results} (telegram: {len(telegram_results)}, pdf: {len(pdf_results)}, calendar: {len(calendar_results)}, news: {len(news_results)})")
+            total_results = len(telegram_results) + len(pdf_results) + len(calendar_results) + len(news_results) + len(reference_results)
+            print(f"Total results found: {total_results} (telegram: {len(telegram_results)}, pdf: {len(pdf_results)}, calendar: {len(calendar_results)}, news: {len(news_results)}, reference: {len(reference_results)})")
             
             # Step 5: Skip LLM response generation - return clean search results only
             generated_response = None
@@ -185,6 +189,8 @@ class SearchService:
                 all_sources.append({**r, 'source_type': 'calendar'})
             for r in news_results:
                 all_sources.append({**r, 'source_type': 'news'})
+            for r in reference_results:
+                all_sources.append({**r, 'source_type': 'reference'})
             
             if self.supabase.connection:
                 self.supabase.save_message(
@@ -206,6 +212,7 @@ class SearchService:
             pdf_search_results = [SearchResult(text=r['text'], metadata=r['metadata'], score=r['score'], source_type=SourceType.PDF) for r in pdf_results]
             calendar_search_results = [SearchResult(text=r['text'], metadata=r['metadata'], score=r['score'], source_type=SourceType.CALENDAR) for r in calendar_results]
             news_search_results = [SearchResult(text=r['text'], metadata=r['metadata'], score=r['score'], source_type=SourceType.NEWS) for r in news_results]
+            reference_search_results = [SearchResult(text=r['text'], metadata=r['metadata'], score=r['score'], source_type=SourceType.REFERENCE) for r in reference_results]
             
             return SearchResponse(
                 success=True,
@@ -216,6 +223,7 @@ class SearchService:
                 pdf_results=pdf_search_results,
                 calendar_results=calendar_search_results,
                 news_results=news_search_results,
+                reference_results=reference_search_results,
                 subscription_status=subscription_status,
                 processing_time_ms=processing_time_ms
             )
@@ -784,6 +792,103 @@ Responde basándote en el contexto proporcionado."""
             return []
         except Exception as e:
             print(f"Error searching AEAT: {e}")
+            import traceback
+            traceback.print_exc()
+            return []
+    
+    def _search_reference(self, query: str) -> List[Dict]:
+        """Search in reference materials using HYBRID search (semantic + keyword + translation)"""
+        if not self.elastic.client:
+            print("Elasticsearch client not available")
+            return []
+        
+        try:
+            # Check if index exists
+            from elasticsearch import NotFoundError
+            if not self.elastic.client.indices.exists(index="reference_materials"):
+                print("⚠️ reference_materials index does not exist, skipping")
+                return []
+            
+            # Generate query embedding for semantic search
+            query_embedding = self._generate_query_embedding(query)
+            
+            # Translate query for keyword search
+            search_query = self._translate_query(query)
+            
+            if query_embedding:
+                # HYBRID SEARCH: kNN (semantic) + multi_match (keyword with translation)
+                search_body = {
+                    "size": 10,
+                    "query": {
+                        "bool": {
+                            "should": [
+                                # Keyword search with translation
+                                {
+                                    "multi_match": {
+                                        "query": search_query,
+                                        "fields": ["title^3", "content^2", "keywords^2", "category"],
+                                        "type": "best_fields"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "knn": {
+                        "field": "content_embedding",
+                        "query_vector": query_embedding,
+                        "k": 10,
+                        "num_candidates": 50
+                    }
+                }
+            else:
+                # FALLBACK: Keyword-only with translation
+                search_body = {
+                    "size": 10,
+                    "query": {
+                        "multi_match": {
+                            "query": search_query,
+                            "fields": ["title^3", "content^2", "keywords^2", "category"],
+                            "type": "best_fields"
+                        }
+                    }
+                }
+            
+            response = self.elastic.client.search(
+                index="reference_materials",
+                body=search_body
+            )
+            
+            results = []
+            for hit in response['hits']['hits']:
+                source = hit['_source']
+                # Get full content for reference materials
+                text = source.get('content', '')
+                
+                results.append({
+                    'text': text,
+                    'metadata': {
+                        'reference_id': source.get('reference_id'),
+                        'title': source.get('title'),
+                        'category': source.get('category'),
+                        'subcategory': source.get('subcategory'),
+                        'keywords': source.get('keywords', []),
+                        'applies_to': source.get('applies_to', []),
+                        'references': source.get('references', []),
+                        'source': source.get('source'),
+                        'last_updated': source.get('last_updated')
+                    },
+                    'score': hit['_score']
+                })
+            
+            search_type = "hybrid (kNN + keyword + translation)" if query_embedding else "keyword + translation"
+            print(f"Reference materials {search_type} search returned {len(results)} results")
+            return results
+            
+        except NotFoundError:
+            print("⚠️ reference_materials index not found")
+            return []
+        except Exception as e:
+            print(f"Error searching reference materials: {e}")
             import traceback
             traceback.print_exc()
             return []
