@@ -26,7 +26,7 @@ This project uses **DIFFERENT embedding models** for different data sources to o
 - **Multilingual**: Excellent for Spanish, Russian, English, Ukrainian
 - **Community discussions**: Good enough quality for conversational data
 - **FREE**: Runs locally with sentence-transformers
-- Status: ⚠️ 6.6% coverage (5,003/75,714)
+- Status: ✅ **100% coverage (75,714/75,714)**
 
 ## Implementation Details
 
@@ -36,16 +36,12 @@ This project uses **DIFFERENT embedding models** for different data sources to o
 - OpenAI (1536 dims) ≠ multilingual-e5 (1024 dims)
 - Cannot mix embeddings from different models in kNN search
 
-**Current Solution**:
+**Current Solution** ✅:
 1. **PDF search**: Generate query embeddings with OpenAI → search with kNN + BM25
-2. **Telegram search**: **Keyword-only (BM25)** for now
-   - No query embeddings needed
-   - Fast and works well for keyword matching
-
-**Future Solution** (TODO):
-- Install `sentence-transformers` on server
-- Generate Telegram query embeddings in real-time with multilingual-e5
-- Enable hybrid search (kNN + BM25) for Telegram
+2. **Telegram search**: Generate query embeddings with multilingual-e5 → search with kNN + BM25
+   - Model loaded at SearchService init (~2 sec startup)
+   - Query embeddings generated in real-time (~300-500ms)
+   - Full hybrid search (semantic + keyword)
 
 ### Document Embeddings
 
@@ -60,12 +56,12 @@ Generated offline with scripts:
 - Cost: ~$10 (one-time)
 - Status: 100% complete
 
-### Telegram (In Progress) ⚠️
+### Telegram (Complete) ✅
 - Documents: 75,714
 - Cost with OpenAI: ~$150 ❌
 - Cost with multilingual-e5: **$0** ✅
-- Status: 6.6% (5,003/75,714)
-- Time to complete: ~2-3 hours
+- Status: ✅ **100% (75,714/75,714)**
+- Time taken: ~4 hours (CPU-only, local MacBook)
 - **Savings: $150!**
 
 ## How to Generate Embeddings
@@ -125,41 +121,36 @@ query_embedding = model.encode([
 
 ## Search Strategy
 
-### Current (Hybrid where possible)
-
-```
-┌─────────────┬──────────────┬─────────────┬──────────────┐
-│   Source    │   Semantic   │   Keyword   │    Status    │
-├─────────────┼──────────────┼─────────────┼──────────────┤
-│ PDF         │ kNN (OpenAI) │ BM25        │ ✅ Working   │
-│ Telegram    │ ❌ Disabled   │ BM25        │ ⚠️ Keyword   │
-│ Calendar    │ N/A          │ BM25        │ ✅ Working   │
-│ News        │ N/A          │ BM25        │ ✅ Working   │
-└─────────────┴──────────────┴─────────────┴──────────────┘
-```
-
-### Future (Full Hybrid)
-
-After installing multilingual-e5 on server:
+### Current (Full Hybrid) ✅
 
 ```
 ┌─────────────┬───────────────────┬─────────────┬──────────────┐
 │   Source    │     Semantic      │   Keyword   │    Status    │
 ├─────────────┼───────────────────┼─────────────┼──────────────┤
 │ PDF         │ kNN (OpenAI)      │ BM25        │ ✅ Working   │
-│ Telegram    │ kNN (E5-large)    │ BM25        │ 🚀 Planned   │
+│ Telegram    │ kNN (E5-large)    │ BM25        │ ✅ Working   │
 │ Calendar    │ N/A               │ BM25        │ ✅ Working   │
 │ News        │ N/A               │ BM25        │ ✅ Working   │
 └─────────────┴───────────────────┴─────────────┴──────────────┘
 ```
 
+**Performance Metrics**:
+
+| Source | Method | Score Range | Query Time |
+|--------|--------|-------------|------------|
+| PDF | Hybrid (kNN + BM25 + translation) | 15-25 | ~2.5s |
+| Telegram | Hybrid (kNN + BM25) | 20-30 | ~2.5s |
+| Calendar | Keyword + translation | 10-15 | ~0.3s |
+
 ## Next Steps
 
 1. ✅ Create embedding generation script for Telegram
-2. ⏳ Run script to generate 70K+ embeddings (FREE!)
-3. ⏳ Install `sentence-transformers` on server
-4. ⏳ Add real-time query embedding generation for Telegram
-5. ⏳ Enable hybrid search (kNN + BM25) for Telegram
+2. ✅ Run script to generate 75K+ embeddings (FREE!)
+3. ✅ Install `sentence-transformers` in requirements
+4. ✅ Add real-time query embedding generation for Telegram
+5. ✅ Enable hybrid search (kNN + BM25) for Telegram
+6. ⏳ Deploy to production server
+7. ⏳ Monitor performance and costs
 
 ## FAQs
 
