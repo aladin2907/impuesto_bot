@@ -4,6 +4,7 @@ Provides unified search interface for knowledge base
 """
 
 import time
+import requests
 from typing import List, Optional, Tuple, Dict
 from datetime import datetime
 
@@ -17,14 +18,7 @@ from app.models.search import (
 from app.services.elasticsearch_service import elastic_service
 from app.services.supabase_service import supabase_service
 from app.services.llm.llm_service import llm_service
-
-# Import sentence-transformers for Telegram embeddings
-try:
-    from sentence_transformers import SentenceTransformer
-    SENTENCE_TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    SENTENCE_TRANSFORMERS_AVAILABLE = False
-    print("Warning: sentence-transformers not available. Telegram will use keyword-only search.")
+from app.config.settings import settings
 
 
 class SearchService:
@@ -37,16 +31,14 @@ class SearchService:
         self.llm = llm_service
         self.initialized = False
         
-        # Load multilingual-e5-large model for Telegram embeddings
-        self.telegram_model = None
-        if SENTENCE_TRANSFORMERS_AVAILABLE:
-            try:
-                print("Loading multilingual-e5-large model for Telegram embeddings...")
-                self.telegram_model = SentenceTransformer("intfloat/multilingual-e5-large")
-                print(f"✅ Telegram embedding model loaded! (dim: {self.telegram_model.get_sentence_embedding_dimension()})")
-            except Exception as e:
-                print(f"⚠️ Failed to load Telegram embedding model: {e}")
-                self.telegram_model = None
+        # HuggingFace API for Telegram embeddings (no local model needed!)
+        self.hf_api_url = "https://api-inference.huggingface.co/models/intfloat/multilingual-e5-large"
+        self.hf_token = settings.HUGGINGFACE_API_TOKEN
+        
+        if self.hf_token:
+            print("✅ HuggingFace API token configured for Telegram embeddings")
+        else:
+            print("⚠️ No HuggingFace token found. Telegram will use keyword-only search.")
     
     def initialize(self) -> bool:
         """Initialize all service connections"""
@@ -412,20 +404,50 @@ Responde basándote en el contexto proporcionado."""
     
     def _generate_telegram_query_embedding(self, query: str) -> Optional[List[float]]:
         """
-        Generate embedding for Telegram search using multilingual-e5-large model
+        Generate embedding for Telegram search using HuggingFace API
+        
+        Uses multilingual-e5-large model via HuggingFace Inference API.
+        No local model loading required - saves RAM!
         
         Returns:
-            List of 1024 floats or None if model not available
+            List of 1024 floats or None if API unavailable
         """
-        if not self.telegram_model:
+        if not self.hf_token:
             return None
         
         try:
-            # Generate embedding using multilingual-e5-large
-            embedding = self.telegram_model.encode(query).tolist()
-            return embedding
+            headers = {"Authorization": f"Bearer {self.hf_token}"}
+            payload = {
+                "inputs": query,
+                "options": {"wait_for_model": True}
+            }
+            
+            response = requests.post(
+                self.hf_api_url,
+                headers=headers,
+                json=payload,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                # HF API returns embedding directly as array
+                embedding = response.json()
+                
+                # If nested in list, extract first element
+                if isinstance(embedding, list) and len(embedding) > 0:
+                    if isinstance(embedding[0], list):
+                        embedding = embedding[0]
+                
+                return embedding
+            else:
+                print(f"⚠️ HuggingFace API error: {response.status_code} - {response.text[:200]}")
+                return None
+                
+        except requests.exceptions.Timeout:
+            print(f"⚠️ HuggingFace API timeout (model loading may take ~20s on first request)")
+            return None
         except Exception as e:
-            print(f"Error generating Telegram embedding: {e}")
+            print(f"⚠️ Error generating Telegram embedding via API: {e}")
             return None
     
     def _search_telegram(self, query: str) -> List[Dict]:

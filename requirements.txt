@@ -10,10 +10,7 @@ langchain-community
 elasticsearch
 psycopg2-binary
 python-dotenv
-# Install CPU-only PyTorch FIRST to avoid CUDA (saves 1GB+ disk space)
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
-sentence-transformers  # FREE embeddings for Telegram (multilingual-e5-large)
+# Note: sentence-transformers removed - using HuggingFace API instead (saves 1.5GB+ RAM!)
 aiogram
 telethon
 beautifulsoup4

@@ -31,6 +31,9 @@ class Settings:
     # OpenRouter
     OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
     
+    # HuggingFace
+    HUGGINGFACE_API_TOKEN: str = os.getenv("HUGGINGFACE_API_TOKEN", "")
+    
     # Elasticsearch
     ELASTIC_CLOUD_ID: str = os.getenv("ELASTIC_CLOUD_ID", "")
     ELASTIC_API_KEY: str = os.getenv("ELASTIC_API_KEY", "")
