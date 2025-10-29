@@ -18,6 +18,14 @@ from app.services.elasticsearch_service import elastic_service
 from app.services.supabase_service import supabase_service
 from app.services.llm.llm_service import llm_service
 
+# Import sentence-transformers for Telegram embeddings
+try:
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+    print("Warning: sentence-transformers not available. Telegram will use keyword-only search.")
+
 
 class SearchService:
     """Unified search service for TuExpertoFiscal"""
@@ -28,6 +36,17 @@ class SearchService:
         self.supabase = supabase_service
         self.llm = llm_service
         self.initialized = False
+        
+        # Load multilingual-e5-large model for Telegram embeddings
+        self.telegram_model = None
+        if SENTENCE_TRANSFORMERS_AVAILABLE:
+            try:
+                print("Loading multilingual-e5-large model for Telegram embeddings...")
+                self.telegram_model = SentenceTransformer("intfloat/multilingual-e5-large")
+                print(f"✅ Telegram embedding model loaded! (dim: {self.telegram_model.get_sentence_embedding_dimension()})")
+            except Exception as e:
+                print(f"⚠️ Failed to load Telegram embedding model: {e}")
+                self.telegram_model = None
     
     def initialize(self) -> bool:
         """Initialize all service connections"""
@@ -391,6 +410,24 @@ Responde basándote en el contexto proporcionado."""
             print(f"Error generating embedding: {e}")
             return None
     
+    def _generate_telegram_query_embedding(self, query: str) -> Optional[List[float]]:
+        """
+        Generate embedding for Telegram search using multilingual-e5-large model
+        
+        Returns:
+            List of 1024 floats or None if model not available
+        """
+        if not self.telegram_model:
+            return None
+        
+        try:
+            # Generate embedding using multilingual-e5-large
+            embedding = self.telegram_model.encode(query).tolist()
+            return embedding
+        except Exception as e:
+            print(f"Error generating Telegram embedding: {e}")
+            return None
+    
     def _search_telegram(self, query: str) -> List[Dict]:
         """
         Search in Telegram channels data using HYBRID search (semantic + keyword)
@@ -403,21 +440,39 @@ Responde basándote en el contexto proporcionado."""
             return []
         
         try:
-            # For now, use KEYWORD-ONLY search for Telegram
-            # TODO: Add multilingual-e5-large model for query embeddings
-            # Issue: OpenAI embeddings (1536) incompatible with multilingual-e5 (1024)
+            # Generate query embedding using multilingual-e5-large (same as indexed data)
+            query_embedding = self._generate_telegram_query_embedding(query)
             
-            # KEYWORD SEARCH ONLY (BM25)
-            search_body = {
-                "size": 10,
-                "query": {
-                    "multi_match": {
-                        "query": query,
-                        "fields": ["content^2", "first_message", "last_message", "topics", "keywords"],
-                        "type": "best_fields"
+            if query_embedding:
+                # HYBRID SEARCH: kNN (semantic) + multi_match (keyword)
+                search_body = {
+                    "size": 10,
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": ["content^2", "first_message", "last_message", "topics", "keywords"],
+                            "type": "best_fields"
+                        }
+                    },
+                    "knn": {
+                        "field": "telegram_embedding",
+                        "query_vector": query_embedding,
+                        "k": 10,
+                        "num_candidates": 50
                     }
                 }
-            }
+            else:
+                # FALLBACK: Keyword-only search (BM25)
+                search_body = {
+                    "size": 10,
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": ["content^2", "first_message", "last_message", "topics", "keywords"],
+                            "type": "best_fields"
+                        }
+                    }
+                }
             
             # Execute search
             response = self.elastic.client.search(
