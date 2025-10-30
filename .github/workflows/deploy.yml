@@ -1,44 +1,81 @@
-name: Deploy to AWS EC2
+name: Build and Deploy
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:  # Позволяет запускать вручную
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata for Docker
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Deploy to EC2
+    - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.0
+      env:
+        IMAGE_NAME: ghcr.io/aladin2907/impuesto_bot:latest
       with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        envs: IMAGE_NAME
         script: |
-          # Navigate to app directory
           cd /home/ubuntu/impuesto_bot
           
           # Pull latest code
           git pull origin main
           
-          # Stop existing containers
-          docker-compose down --remove-orphans
+          # Pull new image (no auth needed for public images)
+          docker pull $IMAGE_NAME
           
-          # Build and start new containers
-          docker-compose up -d --build app
+          # Stop and remove old containers
+          docker-compose down
           
-          # Clean up old images
-          docker image prune -f
+          # Start with new image
+          docker-compose up -d
           
-          # Show running containers
-          docker-compose ps
+          # Clean up old images to free up disk space
+          docker image prune -af
           
-          # Health check - wait for app to start
-          sleep 15
-          curl -f http://localhost:8000/health || exit 1
-          
-          echo "🚀 Deployment completed successfully!"
+          # Show status
+          docker ps
+          echo "Deployment completed!"
