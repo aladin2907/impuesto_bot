@@ -12,6 +12,12 @@ AI-powered tax expert bot for Spain, providing accurate answers based on Spanish
 - 📊 Conversation history and summarization
 - 🔄 Automated weekly parsing of Telegram channels
 
+## Project Status
+
+This repository is mid-migration. The current code does not fully match the
+historical production documentation, and the search pipeline is not wired end
+to end. See `docs/PROJECT_STATUS.md` for the current code-based status.
+
 ## Technology Stack
 
 - **Backend:** Python 3.11+, FastAPI
@@ -78,4 +84,3 @@ Proprietary - All rights reserved
 ---
 
 *Developed by NAIL - Nahornyi AI Lab*
-

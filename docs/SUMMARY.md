@@ -1,5 +1,19 @@
 # TuExpertoFiscal - Implementation Summary
 
+## Current Code Status (Repository)
+
+This repository is mid-migration and the code does not match the historical
+production docs below.
+
+- `app/services/search_service.py` is missing, but `app/api/webhook.py` imports it.
+- `app/services/rag/langchain_rag.py` still depends on Elasticsearch, while
+  `app/config/settings.py` no longer defines Elasticsearch settings and
+  `langchain-elasticsearch` is not in `requirements.txt`.
+- Supabase is only wired for user/session data; vector search methods are stubs.
+- Embeddings and ingestion scripts are incomplete.
+
+See `docs/PROJECT_STATUS.md` for the authoritative status.
+
 ## 🎯 **Текущее состояние (27.10.2025)**
 
 ### ✅ **Production Ready Features**
@@ -269,4 +283,3 @@ python scripts/ingestion/add_calendar_embeddings.py
 *Last updated: 2025-10-27*  
 *Status: Production Ready ✅*  
 *Version: 1.4.0*
-

@@ -16,7 +16,7 @@ class Settings:
     
     # LLM Configuration
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "openai")  # openai, google, anthropic, openrouter
-    LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4o")
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4.1")
     LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.7"))
     
     # OpenAI
@@ -33,15 +33,11 @@ class Settings:
     
     # HuggingFace
     HUGGINGFACE_API_TOKEN: str = os.getenv("HUGGINGFACE_API_TOKEN", "")
-    
-    # Elasticsearch
-    ELASTIC_CLOUD_ID: str = os.getenv("ELASTIC_CLOUD_ID", "")
-    ELASTIC_API_KEY: str = os.getenv("ELASTIC_API_KEY", "")
-    ELASTIC_INDEX_NAME: str = os.getenv("ELASTIC_INDEX_NAME", "tuexpertofiscal_knowledge")
-    
+
     # Supabase
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+    SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
     SUPABASE_DB_URL: str = os.getenv("SUPABASE_DB_URL", "")
     
     # Telegram Bot
@@ -64,10 +60,9 @@ class Settings:
         """Validate that all required settings are present"""
         required = [
             self.OPENAI_API_KEY,
-            self.ELASTIC_CLOUD_ID,
-            self.ELASTIC_API_KEY,
             self.SUPABASE_URL,
             self.SUPABASE_KEY,
+            self.SUPABASE_DB_URL,
         ]
         return all(required)
 

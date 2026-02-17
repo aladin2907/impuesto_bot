@@ -1,53 +1,55 @@
 """
 Supabase service for database operations
-Simplified user management with direct telegram_id lookup
+Uses Supabase REST API (PostgREST) instead of direct psycopg2
 """
 
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import logging
 from typing import Optional, Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from supabase import create_client, Client
 from app.config.settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 class SupabaseService:
-    """Service for interacting with Supabase PostgreSQL database"""
-    
+    """Service for interacting with Supabase via REST API"""
+
     def __init__(self):
-        """Initialize database connection"""
-        self.connection = None
-    
+        """Initialize Supabase client"""
+        self.client: Optional[Client] = None
+
     def connect(self) -> bool:
-        """Establish connection to Supabase PostgreSQL"""
+        """Establish connection to Supabase"""
         try:
-            self.connection = psycopg2.connect(
-                settings.SUPABASE_DB_URL,
-                cursor_factory=RealDictCursor
+            # Prefer service_role key (bypasses RLS)
+            key = settings.SUPABASE_SERVICE_KEY or settings.SUPABASE_KEY
+            self.client = create_client(
+                settings.SUPABASE_URL,
+                key
             )
-            print("Connected to Supabase PostgreSQL")
+            logger.info("Connected to Supabase REST API")
             return True
         except Exception as e:
-            print(f"Failed to connect to Supabase: {e}")
+            logger.error(f"Failed to connect to Supabase: {e}")
             return False
-    
+
     def get_user_by_telegram_id(self, telegram_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Get user by telegram_id - simple single query!
-        Returns user dict or None
-        """
+        """Get user by telegram_id"""
         try:
-            cursor = self.connection.cursor()
-            cursor.execute("""
-                SELECT * FROM users
-                WHERE telegram_id = %s
-            """, (telegram_id,))
-            
-            return cursor.fetchone()
-            
+            if not self.client:
+                return None
+            result = self.client.table('users') \
+                .select('*') \
+                .eq('telegram_id', telegram_id) \
+                .limit(1) \
+                .execute()
+            return result.data[0] if result.data else None
         except Exception as e:
-            print(f"Error getting user by telegram_id: {e}")
+            logger.error(f"Error getting user by telegram_id: {e}")
             return None
-    
+
     def create_user(
         self,
         telegram_id: int,
@@ -57,37 +59,31 @@ class SupabaseService:
         phone: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None
     ) -> Optional[str]:
-        """
-        Create new user with telegram data
-        Returns user_id (UUID) or None
-        """
+        """Create new user, returns user_id (UUID) or None"""
         try:
-            cursor = self.connection.cursor()
-            cursor.execute("""
-                INSERT INTO users 
-                (telegram_id, username, first_name, last_name, phone, 
-                 subscription_status, role, last_seen_at, metadata)
-                VALUES (%s, %s, %s, %s, %s, 'free', 'user', NOW(), %s)
-                RETURNING id
-            """, (
-                telegram_id,
-                username,
-                first_name,
-                last_name,
-                phone,
-                psycopg2.extras.Json(metadata or {})
-            ))
-            
-            user_id = cursor.fetchone()['id']
-            self.connection.commit()
-            print(f"Created new user with telegram_id {telegram_id}: {user_id}")
-            return user_id
-            
-        except Exception as e:
-            print(f"Error creating user: {e}")
-            self.connection.rollback()
+            if not self.client:
+                return None
+            result = self.client.table('users').insert({
+                'telegram_id': telegram_id,
+                'username': username,
+                'first_name': first_name,
+                'last_name': last_name,
+                'phone': phone,
+                'subscription_status': 'free',
+                'role': 'user',
+                'last_seen_at': datetime.utcnow().isoformat(),
+                'metadata': metadata or {}
+            }).execute()
+
+            if result.data:
+                user_id = result.data[0]['id']
+                logger.info(f"Created user telegram_id={telegram_id}: {user_id}")
+                return user_id
             return None
-    
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+            return None
+
     def get_or_create_user(
         self,
         telegram_id: int,
@@ -97,19 +93,13 @@ class SupabaseService:
         phone: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None
     ) -> Optional[Dict[str, Any]]:
-        """
-        Get existing user or create new one - super simple now!
-        Returns full user dict
-        """
-        # Try to get existing user
+        """Get existing user or create new one"""
         user = self.get_user_by_telegram_id(telegram_id)
-        
+
         if user:
-            # Update last_seen_at
             self.update_last_seen(user['id'])
             return user
-        
-        # Create new user
+
         user_id = self.create_user(
             telegram_id=telegram_id,
             username=username,
@@ -118,111 +108,69 @@ class SupabaseService:
             phone=phone,
             metadata=metadata
         )
-        
+
         if user_id:
-            # Return created user
             return self.get_user_by_telegram_id(telegram_id)
-        
         return None
-    
+
     def update_last_seen(self, user_id: str) -> bool:
         """Update user's last_seen_at timestamp"""
         try:
-            cursor = self.connection.cursor()
-            cursor.execute("""
-                UPDATE users
-                SET last_seen_at = NOW()
-                WHERE id = %s
-            """, (user_id,))
-            self.connection.commit()
+            if not self.client:
+                return False
+            self.client.table('users') \
+                .update({'last_seen_at': datetime.utcnow().isoformat()}) \
+                .eq('id', user_id) \
+                .execute()
             return True
-            
         except Exception as e:
-            print(f"Error updating last_seen: {e}")
-            self.connection.rollback()
+            logger.error(f"Error updating last_seen: {e}")
             return False
-    
-    def get_user_subscription_status(self, user_id: str) -> str:
-        """Get user's subscription status"""
-        try:
-            cursor = self.connection.cursor()
-            cursor.execute("""
-                SELECT subscription_status, subscription_expires_at
-                FROM users
-                WHERE id = %s
-            """, (user_id,))
-            
-            result = cursor.fetchone()
-            if not result:
-                return 'free'
-            
-            # Check if premium expired
-            if result['subscription_status'] == 'premium':
-                if result['subscription_expires_at'] and result['subscription_expires_at'] < datetime.now():
-                    # Expired, update to free
-                    cursor.execute("""
-                        UPDATE users SET subscription_status = 'free'
-                        WHERE id = %s
-                    """, (user_id,))
-                    self.connection.commit()
-                    return 'free'
-            
-            return result['subscription_status']
-            
-        except Exception as e:
-            print(f"Error getting subscription status: {e}")
-            return 'free'
-    
+
     def create_dialogue_session(self, user_id: str) -> Optional[str]:
         """Create a new dialogue session"""
         try:
-            cursor = self.connection.cursor()
-            cursor.execute("""
-                INSERT INTO dialogue_sessions (user_id, created_at, updated_at)
-                VALUES (%s, NOW(), NOW())
-                RETURNING id
-            """, (user_id,))
-            
-            session_id = cursor.fetchone()['id']
-            self.connection.commit()
-            return session_id
-            
-        except Exception as e:
-            print(f"Error creating session: {e}")
-            self.connection.rollback()
+            if not self.client:
+                return None
+            now = datetime.utcnow().isoformat()
+            result = self.client.table('dialogue_sessions').insert({
+                'user_id': user_id,
+                'created_at': now,
+                'updated_at': now
+            }).execute()
+
+            if result.data:
+                return result.data[0]['id']
             return None
-    
+        except Exception as e:
+            logger.error(f"Error creating session: {e}")
+            return None
+
     def get_or_create_active_session(self, user_id: str, max_idle_hours: int = 24) -> Optional[str]:
-        """
-        Get active session or create new one if last session is too old
-        """
+        """Get active session or create new one if last session is too old"""
         try:
-            cursor = self.connection.cursor()
-            
-            # Get most recent session
-            cursor.execute("""
-                SELECT id, updated_at
-                FROM dialogue_sessions
-                WHERE user_id = %s
-                ORDER BY updated_at DESC
-                LIMIT 1
-            """, (user_id,))
-            
-            result = cursor.fetchone()
-            
-            if result:
-                # Check if session is still active (within max_idle_hours)
-                time_diff = datetime.now() - result['updated_at']
-                if time_diff.total_seconds() / 3600 < max_idle_hours:
-                    return result['id']
-            
-            # Create new session
+            if not self.client:
+                return None
+
+            result = self.client.table('dialogue_sessions') \
+                .select('id, updated_at') \
+                .eq('user_id', user_id) \
+                .order('updated_at', desc=True) \
+                .limit(1) \
+                .execute()
+
+            if result.data:
+                session = result.data[0]
+                updated = datetime.fromisoformat(session['updated_at'].replace('Z', '+00:00'))
+                now = datetime.utcnow().replace(tzinfo=updated.tzinfo)
+                if (now - updated).total_seconds() / 3600 < max_idle_hours:
+                    return session['id']
+
             return self.create_dialogue_session(user_id)
-            
         except Exception as e:
-            print(f"Error getting/creating active session: {e}")
+            logger.error(f"Error getting/creating active session: {e}")
             return None
-    
+
     def save_message(
         self,
         session_id: str,
@@ -232,82 +180,62 @@ class SupabaseService:
         sources: Optional[List[Dict]] = None,
         is_relevant: bool = True
     ) -> bool:
-        """
-        Save a message to the database
-        Now with user_id instead of channel_id - much simpler!
-        """
+        """Save a message to the database"""
         try:
-            cursor = self.connection.cursor()
-            cursor.execute("""
-                INSERT INTO messages 
-                (session_id, user_id, query_text, response_text, sources, is_relevant, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s, NOW())
-            """, (
-                session_id,
-                user_id,
-                query_text,
-                response_text,
-                psycopg2.extras.Json(sources or []),
-                is_relevant
-            ))
-            
+            if not self.client:
+                return False
+
+            self.client.table('messages').insert({
+                'session_id': session_id,
+                'user_id': user_id,
+                'query_text': query_text,
+                'response_text': response_text,
+                'sources': sources or [],
+                'is_relevant': is_relevant,
+                'created_at': datetime.utcnow().isoformat()
+            }).execute()
+
             # Update session's updated_at
-            cursor.execute("""
-                UPDATE dialogue_sessions
-                SET updated_at = NOW()
-                WHERE id = %s
-            """, (session_id,))
-            
-            self.connection.commit()
+            self.client.table('dialogue_sessions') \
+                .update({'updated_at': datetime.utcnow().isoformat()}) \
+                .eq('id', session_id) \
+                .execute()
+
             return True
-            
         except Exception as e:
-            print(f"Error saving message: {e}")
-            self.connection.rollback()
+            logger.error(f"Error saving message: {e}")
             return False
-    
+
     def get_user_messages(
         self,
         user_id: str,
         limit: int = 10,
         session_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """
-        Get user's message history
-        Optionally filter by session_id
-        """
+        """Get user's message history"""
         try:
-            cursor = self.connection.cursor()
-            
+            if not self.client:
+                return []
+
+            query = self.client.table('messages') \
+                .select('*, dialogue_sessions(created_at)') \
+                .eq('user_id', user_id)
+
             if session_id:
-                cursor.execute("""
-                    SELECT m.*, ds.created_at as session_started
-                    FROM messages m
-                    JOIN dialogue_sessions ds ON m.session_id = ds.id
-                    WHERE m.user_id = %s AND m.session_id = %s
-                    ORDER BY m.created_at DESC
-                    LIMIT %s
-                """, (user_id, session_id, limit))
-            else:
-                cursor.execute("""
-                    SELECT m.*, ds.created_at as session_started
-                    FROM messages m
-                    JOIN dialogue_sessions ds ON m.session_id = ds.id
-                    WHERE m.user_id = %s
-                    ORDER BY m.created_at DESC
-                    LIMIT %s
-                """, (user_id, limit))
-            
-            return cursor.fetchall() or []
-            
+                query = query.eq('session_id', session_id)
+
+            result = query.order('created_at', desc=True) \
+                .limit(limit) \
+                .execute()
+
+            return result.data or []
         except Exception as e:
-            print(f"Error getting user messages: {e}")
+            logger.error(f"Error getting user messages: {e}")
             return []
-    
+
     def close(self):
-        """Close database connection"""
-        if self.connection:
-            self.connection.close()
+        """Close connection (no-op for REST API)"""
+        pass
 
 
 # Global instance

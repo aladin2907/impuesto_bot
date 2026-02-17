@@ -1,21 +1,23 @@
 fastapi
 uvicorn[standard]
 pydantic
+pydantic-settings
 langchain
 langchain-openai
 langchain-google-genai
 langchain-anthropic
-langchain-elasticsearch
 langchain-community
-elasticsearch
 psycopg2-binary
+pgvector
+supabase
 python-dotenv
-# Note: sentence-transformers removed - using HuggingFace API instead (saves 1.5GB+ RAM!)
 aiogram
+stripe
 telethon
 beautifulsoup4
 requests
 pypdf
+numpy
 
 # Testing dependencies
 pytest

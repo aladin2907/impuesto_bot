@@ -25,3 +25,10 @@ logs/
 *.log
 telegram_session.session
 telegram_session.session-journal
+
+# Archives
+*.tar.gz
+
+# Temp test files
+test_*.py
+!tests/test_*.py
