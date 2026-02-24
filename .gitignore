@@ -26,6 +26,9 @@ logs/
 telegram_session.session
 telegram_session.session-journal
 
+# Trash (archived/deprecated files)
+.trash/
+
 # Archives
 *.tar.gz
 
