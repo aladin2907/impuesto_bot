@@ -18,6 +18,7 @@ beautifulsoup4
 requests
 pypdf
 numpy
+sentence-transformers
 
 # Testing dependencies
 pytest
