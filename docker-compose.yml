@@ -1,6 +1,7 @@
 services:
   taxbot:
-    build: .
+    image: ghcr.io/aladin2907/impuesto_bot:latest
+    build: .  # fallback for local build
     container_name: taxbot
     restart: unless-stopped
     ports:
@@ -11,21 +12,42 @@ services:
       - PYTHONUNBUFFERED=1
       - TOKENIZERS_PARALLELISM=false
     volumes:
-      - hf-cache:/home/app/.cache  # cache HuggingFace model
+      - hf-cache:/home/app/.cache
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # Auto-update: pulls new images from GHCR and restarts containers
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=60
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_ROLLING_RESTART=true
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
 
   # --- Add more bots below ---
   # myotherbot:
-  #   build: ../other-bot
+  #   image: ghcr.io/aladin2907/other-bot:latest
   #   container_name: myotherbot
   #   restart: unless-stopped
+  #   ports:
+  #     - "8001:8000"
   #   env_file:
-  #     - ../other-bot/.env
+  #     - /home/platon/other-bot/.env
+  #   labels:
+  #     - "com.centurylinklabs.watchtower.enable=true"
 
 volumes:
   hf-cache:
