@@ -330,7 +330,7 @@ class SubscriptionService:
 
     async def handle_webhook(self, payload: bytes, sig_header: str) -> bool:
         """
-        Обработать Stripe Webhook
+        Обработать Stripe Webhook (с верификацией подписи)
 
         Args:
             payload: Тело запроса
@@ -344,30 +344,50 @@ class SubscriptionService:
             event = stripe.Webhook.construct_event(
                 payload, sig_header, webhook_secret
             )
-
-            # Обрабатываем события
-            if event['type'] == 'checkout.session.completed':
-                await self._handle_checkout_completed(event['data']['object'])
-
-            elif event['type'] == 'customer.subscription.updated':
-                await self._handle_subscription_updated(event['data']['object'])
-
-            elif event['type'] == 'customer.subscription.deleted':
-                await self._handle_subscription_deleted(event['data']['object'])
-
-            elif event['type'] == 'invoice.payment_succeeded':
-                await self._handle_payment_succeeded(event['data']['object'])
-
-            elif event['type'] == 'invoice.payment_failed':
-                await self._handle_payment_failed(event['data']['object'])
-
-            return True
+            return await self.handle_event(event)
 
         except stripe.error.SignatureVerificationError:
             logger.error("Invalid Stripe webhook signature")
             return False
         except Exception as e:
             logger.error(f"Error handling webhook: {e}")
+            return False
+
+    async def handle_event(self, event) -> bool:
+        """
+        Обработать Stripe Event (уже верифицированный)
+
+        Args:
+            event: Stripe Event object
+
+        Returns:
+            True если успешно обработано
+        """
+        try:
+            event_type = event['type']
+
+            if event_type == 'checkout.session.completed':
+                await self._handle_checkout_completed(event['data']['object'])
+
+            elif event_type == 'customer.subscription.updated':
+                await self._handle_subscription_updated(event['data']['object'])
+
+            elif event_type == 'customer.subscription.deleted':
+                await self._handle_subscription_deleted(event['data']['object'])
+
+            elif event_type == 'invoice.payment_succeeded':
+                await self._handle_payment_succeeded(event['data']['object'])
+
+            elif event_type == 'invoice.payment_failed':
+                await self._handle_payment_failed(event['data']['object'])
+
+            else:
+                logger.info(f"Unhandled Stripe event type: {event_type}")
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Error handling Stripe event: {e}")
             return False
 
     async def _handle_checkout_completed(self, session: Dict[str, Any]):

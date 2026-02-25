@@ -120,26 +120,58 @@ async def cmd_about(message: Message):
 
 @router.message(Command("subscribe"))
 async def cmd_subscribe(message: Message):
-    """Обработка команды /subscribe - оформление подписки"""
+    """Обработка команды /subscribe [basic|pro] - оформление подписки"""
     if not subscription_service:
         await message.answer("⚠️ El servicio de suscripción no está disponible.")
         return
 
     user = message.from_user
-    plan = await subscription_service.get_user_plan(user.id)
+    current_plan = await subscription_service.get_user_plan(user.id)
     is_russian = any('\u0400' <= c <= '\u04FF' for c in (user.first_name or ''))
 
-    if plan.plan_name == 'pro':
+    # Проверяем аргумент: /subscribe basic или /subscribe pro
+    args = message.text.split()
+    chosen_plan = args[1].lower() if len(args) > 1 else None
+
+    if chosen_plan in ('basic', 'pro'):
+        # Пользователь выбрал план — создаём Stripe Checkout
+        if current_plan.plan_name == chosen_plan:
+            text = "✅ У вас уже этот план!" if is_russian else "✅ Ya tienes este plan!"
+            await message.answer(text)
+            return
+
+        checkout_url = await subscription_service.create_checkout_session(
+            telegram_id=user.id,
+            plan=chosen_plan,
+            billing_period='monthly'
+        )
+
+        if checkout_url:
+            if is_russian:
+                text = f"💳 Оформить *{chosen_plan.capitalize()}* — [перейти к оплате]({checkout_url})"
+            else:
+                text = f"💳 Suscribirse a *{chosen_plan.capitalize()}* — [ir al pago]({checkout_url})"
+            await message.answer(text, parse_mode=ParseMode.MARKDOWN)
+        else:
+            text = (
+                "⚠️ Оплата временно недоступна. Попробуйте позже."
+                if is_russian else
+                "⚠️ El pago no está disponible temporalmente. Inténtalo más tarde."
+            )
+            await message.answer(text)
+        return
+
+    if current_plan.plan_name == 'pro':
         # Уже Pro - показываем портал управления
         portal_url = await subscription_service.create_portal_session(user.id)
         if portal_url:
             text = (
                 f"✅ *У вас активен план Pro*\n\n"
-                f"Истекает: {plan.expires_at.strftime('%d/%m/%Y') if plan.expires_at else 'N/A'}\n\n"
+                f"Истекает: {current_plan.expires_at.strftime('%d/%m/%Y') if current_plan.expires_at else 'N/A'}\n\n"
                 f"[Управление подпиской]({portal_url})"
             ) if is_russian else (
                 f"✅ *Tienes el plan Pro activo*\n\n"
-                f"Expira: {plan.expires_at.strftime('%d/%m/%Y') if plan.expires_at else 'N/A'}\n\n"
+                f"Expira: {current_plan.expires_at.strftime('%d/%m/%Y') if current_plan.expires_at else 'N/A'}\n\n"
                 f"[Gestionar suscripción]({portal_url})"
             )
             await message.answer(text, parse_mode=ParseMode.MARKDOWN)
@@ -164,7 +196,7 @@ async def cmd_subscribe(message: Message):
                 "  • Все функции\n"
                 "  • Приоритетные ответы\n"
                 "  • Безлимитная история\n\n"
-                f"Текущий план: *{plan.plan_name.capitalize()}*\n"
+                f"Текущий план: *{current_plan.plan_name.capitalize()}*\n"
                 "Используйте /subscribe basic или /subscribe pro"
             )
         else:
@@ -184,7 +216,7 @@ async def cmd_subscribe(message: Message):
                 "  • Todas las funciones\n"
                 "  • Respuestas prioritarias\n"
                 "  • Historial ilimitado\n\n"
-                f"Plan actual: *{plan.plan_name.capitalize()}*\n"
+                f"Plan actual: *{current_plan.plan_name.capitalize()}*\n"
                 "Usa /subscribe basic o /subscribe pro"
             )
         await message.answer(text, parse_mode=ParseMode.MARKDOWN)
@@ -333,7 +365,7 @@ async def set_bot_commands(bot: Bot):
 
 
 async def main():
-    """Запуск бота"""
+    """Запуск бота + Stripe webhook сервера"""
     global agent, subscription_service
 
     # Инициализация бота
@@ -364,6 +396,12 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     logger.info("✅ Webhook cleared, switching to polling mode")
 
+    # Запуск Stripe webhook сервера параллельно с ботом
+    from app.api.stripe_webhook import run_webhook_server
+    webhook_port = int(os.getenv("WEBHOOK_PORT", "8000"))
+    logger.info(f"🔗 Starting Stripe webhook server on port {webhook_port}...")
+    webhook_task = asyncio.create_task(run_webhook_server(port=webhook_port))
+
     # Запуск polling
     logger.info("🚀 Bot started! @tax_spaine_bot")
     logger.info("Press Ctrl+C to stop")
@@ -371,6 +409,7 @@ async def main():
     try:
         await dp.start_polling(bot)
     finally:
+        webhook_task.cancel()
         await bot.session.close()
 
 
