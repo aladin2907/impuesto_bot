@@ -12,7 +12,7 @@ from typing import Optional
 
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.filters import Command, CommandStart
-from aiogram.types import Message, BotCommand
+from aiogram.types import Message, BotCommand, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.enums import ParseMode, ChatAction
 
 from app.config.settings import settings
@@ -165,20 +165,24 @@ async def cmd_subscribe(message: Message):
         # Уже Pro - показываем портал управления
         portal_url = await subscription_service.create_portal_session(user.id)
         if portal_url:
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(
+                    text="⚙️ Управление подпиской" if is_russian else "⚙️ Gestionar suscripción",
+                    url=portal_url
+                )]
+            ])
             text = (
                 f"✅ *У вас активен план Pro*\n\n"
-                f"Истекает: {current_plan.expires_at.strftime('%d/%m/%Y') if current_plan.expires_at else 'N/A'}\n\n"
-                f"[Управление подпиской]({portal_url})"
+                f"Истекает: {current_plan.expires_at.strftime('%d/%m/%Y') if current_plan.expires_at else 'N/A'}"
             ) if is_russian else (
                 f"✅ *Tienes el plan Pro activo*\n\n"
-                f"Expira: {current_plan.expires_at.strftime('%d/%m/%Y') if current_plan.expires_at else 'N/A'}\n\n"
-                f"[Gestionar suscripción]({portal_url})"
+                f"Expira: {current_plan.expires_at.strftime('%d/%m/%Y') if current_plan.expires_at else 'N/A'}"
             )
-            await message.answer(text, parse_mode=ParseMode.MARKDOWN)
+            await message.answer(text, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard)
         else:
             await message.answer("✅ Ya tienes el plan Pro activo.")
     else:
-        # Free или Basic - показываем тарифы
+        # Free или Basic - показываем тарифы с кнопками
         if is_russian:
             text = (
                 "🚀 *Тарифные планы TuExpertoFiscal*\n\n"
@@ -196,8 +200,7 @@ async def cmd_subscribe(message: Message):
                 "  • Все функции\n"
                 "  • Приоритетные ответы\n"
                 "  • Безлимитная история\n\n"
-                f"Текущий план: *{current_plan.plan_name.capitalize()}*\n"
-                "Используйте /subscribe basic или /subscribe pro"
+                f"Текущий план: *{current_plan.plan_name.capitalize()}*"
             )
         else:
             text = (
@@ -216,10 +219,63 @@ async def cmd_subscribe(message: Message):
                 "  • Todas las funciones\n"
                 "  • Respuestas prioritarias\n"
                 "  • Historial ilimitado\n\n"
-                f"Plan actual: *{current_plan.plan_name.capitalize()}*\n"
-                "Usa /subscribe basic o /subscribe pro"
+                f"Plan actual: *{current_plan.plan_name.capitalize()}*"
             )
-        await message.answer(text, parse_mode=ParseMode.MARKDOWN)
+
+        # Inline-кнопки для оплаты
+        buttons = []
+        if current_plan.plan_name != 'basic':
+            buttons.append([InlineKeyboardButton(
+                text="⭐ Basic — €2.99/мес" if is_russian else "⭐ Basic — €2.99/mes",
+                callback_data="subscribe:basic"
+            )])
+        buttons.append([InlineKeyboardButton(
+            text="🚀 Pro — €9.99/мес" if is_russian else "🚀 Pro — €9.99/mes",
+            callback_data="subscribe:pro"
+        )])
+        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+        await message.answer(text, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard)
+
+
+@router.callback_query(F.data.startswith("subscribe:"))
+async def callback_subscribe(callback: CallbackQuery):
+    """Обработка нажатия кнопки подписки"""
+    if not subscription_service:
+        await callback.answer("⚠️ Servicio no disponible", show_alert=True)
+        return
+
+    chosen_plan = callback.data.split(":")[1]  # "basic" or "pro"
+    user = callback.from_user
+    is_russian = any('\u0400' <= c <= '\u04FF' for c in (user.first_name or ''))
+
+    await callback.answer()  # убираем "часики" на кнопке
+
+    checkout_url = await subscription_service.create_checkout_session(
+        telegram_id=user.id,
+        plan=chosen_plan,
+        billing_period='monthly'
+    )
+
+    if checkout_url:
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(
+                text="💳 Перейти к оплате" if is_russian else "💳 Ir al pago",
+                url=checkout_url
+            )]
+        ])
+        if is_russian:
+            text = f"Оформление подписки *{chosen_plan.capitalize()}*\n\nНажмите кнопку ниже для оплаты:"
+        else:
+            text = f"Suscripción *{chosen_plan.capitalize()}*\n\nPulsa el botón para pagar:"
+        await callback.message.answer(text, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard)
+    else:
+        text = (
+            "⚠️ Оплата временно недоступна. Попробуйте позже."
+            if is_russian else
+            "⚠️ El pago no está disponible temporalmente. Inténtalo más tarde."
+        )
+        await callback.message.answer(text)
 
 
 @router.message(Command("status"))
