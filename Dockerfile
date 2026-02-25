@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN useradd --create-home app && chown -R app:app /app
+RUN useradd --create-home app && chown -R app:app /app \
+    && mkdir -p /home/app/.cache && chown -R app:app /home/app/.cache
 USER app
 
 EXPOSE 8000
