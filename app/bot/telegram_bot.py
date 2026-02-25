@@ -35,6 +35,16 @@ logger = logging.getLogger(__name__)
 # Router для обработки сообщений
 router = Router()
 
+
+def _subscribe_keyboard(is_russian: bool) -> InlineKeyboardMarkup:
+    """Кнопка 'Подписаться' на всю ширину для бесплатных пользователей"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text="⭐ Подписаться — от €2.99/мес" if is_russian else "⭐ Suscribirse — desde €2.99/mes",
+            callback_data="show_plans"
+        )]
+    ])
+
 # Глобальные инстансы (инициализируются при старте)
 agent: Optional[TaxAgentService] = None
 subscription_service: Optional[SubscriptionService] = None
@@ -278,6 +288,50 @@ async def callback_subscribe(callback: CallbackQuery):
         await callback.message.answer(text)
 
 
+@router.callback_query(F.data == "show_plans")
+async def callback_show_plans(callback: CallbackQuery):
+    """Показать планы при нажатии кнопки 'Подписаться'"""
+    if not subscription_service:
+        await callback.answer("⚠️ Servicio no disponible", show_alert=True)
+        return
+
+    user = callback.from_user
+    is_russian = any('\u0400' <= c <= '\u04FF' for c in (user.first_name or ''))
+    current_plan = await subscription_service.get_user_plan(user.id)
+
+    await callback.answer()
+
+    # Показываем планы с кнопками оплаты
+    if is_russian:
+        text = (
+            "⭐ *Basic* — €2.99/мес\n"
+            "25 запросов/день, поиск в документах\n\n"
+            "🚀 *Pro* — €9.99/мес\n"
+            "Безлимит, все функции, приоритет"
+        )
+    else:
+        text = (
+            "⭐ *Basic* — €2.99/mes\n"
+            "25 consultas/día, búsqueda en documentos\n\n"
+            "🚀 *Pro* — €9.99/mes\n"
+            "Ilimitado, todas las funciones, prioridad"
+        )
+
+    buttons = []
+    if current_plan.plan_name != 'basic':
+        buttons.append([InlineKeyboardButton(
+            text="⭐ Basic — €2.99/мес" if is_russian else "⭐ Basic — €2.99/mes",
+            callback_data="subscribe:basic"
+        )])
+    buttons.append([InlineKeyboardButton(
+        text="🚀 Pro — €9.99/мес" if is_russian else "🚀 Pro — €9.99/mes",
+        callback_data="subscribe:pro"
+    )])
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    await callback.message.answer(text, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard)
+
+
 @router.message(Command("status"))
 async def cmd_status(message: Message):
     """Обработка команды /status - статус подписки и лимитов"""
@@ -340,15 +394,20 @@ async def handle_message(message: Message):
 
     logger.info(f"Query from {user.id} ({user.username}): {query[:100]}")
 
+    # Определяем язык пользователя
+    is_russian = any('\u0400' <= c <= '\u04FF' for c in query) or any('\u0400' <= c <= '\u04FF' for c in (user.first_name or ''))
+
     # Проверяем лимиты подписки
+    user_plan = None
     if subscription_service:
-        can_send, plan = await subscription_service.can_send_message(user.id)
+        can_send, user_plan = await subscription_service.can_send_message(user.id)
         if not can_send:
-            # Определяем язык пользователя
-            if any('\u0400' <= c <= '\u04FF' for c in query):
-                await message.answer(plan.limit_message_ru, parse_mode=ParseMode.MARKDOWN)
+            if is_russian:
+                await message.answer(user_plan.limit_message_ru, parse_mode=ParseMode.MARKDOWN,
+                                     reply_markup=_subscribe_keyboard(True))
             else:
-                await message.answer(plan.limit_message_es, parse_mode=ParseMode.MARKDOWN)
+                await message.answer(user_plan.limit_message_es, parse_mode=ParseMode.MARKDOWN,
+                                     reply_markup=_subscribe_keyboard(False))
             return
 
     # Показываем индикатор "печатает..."
@@ -376,18 +435,24 @@ async def handle_message(message: Message):
             else:
                 reply_text += LOW_CONFIDENCE_WARNING_ES
 
+        # Кнопка подписки для free-пользователей
+        show_subscribe = user_plan and user_plan.plan_name == 'free'
+        reply_markup = _subscribe_keyboard(is_russian) if show_subscribe else None
+
         # Отправляем ответ (разбиваем на части если длинный)
         if len(reply_text) > 4000:
             # Telegram ограничивает сообщения до 4096 символов
             parts = [reply_text[i:i+4000] for i in range(0, len(reply_text), 4000)]
-            for part in parts:
-                await message.answer(part, parse_mode=ParseMode.MARKDOWN)
+            for i, part in enumerate(parts):
+                # Кнопку только к последней части
+                markup = reply_markup if i == len(parts) - 1 else None
+                await message.answer(part, parse_mode=ParseMode.MARKDOWN, reply_markup=markup)
         else:
             try:
-                await message.answer(reply_text, parse_mode=ParseMode.MARKDOWN)
+                await message.answer(reply_text, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup)
             except Exception:
                 # Если Markdown не парсится, отправляем без форматирования
-                await message.answer(reply_text)
+                await message.answer(reply_text, reply_markup=reply_markup)
 
         logger.info(
             f"Response sent to {user.id}: "
