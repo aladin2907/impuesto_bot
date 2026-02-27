@@ -121,55 +121,57 @@ class ResponseGenerator:
         tools_results: Optional[List[ToolResult]] = None,
         session_history: Optional[List[Dict[str, str]]] = None
     ) -> str:
-        """Build user prompt with context, tools and history (English to avoid biasing response language)"""
+        """Собрать user prompt с контекстом, инструментами и историей"""
         parts = []
 
-        # Search context
+        # Контекст из поиска
         if context.results:
-            parts.append("## Knowledge base context:\n")
-            for i, result in enumerate(context.results[:8], 1):
+            parts.append("## Contexto de la base de conocimientos:\n")
+            for i, result in enumerate(context.results[:8], 1):  # Макс 8 результатов
                 source_label = self._get_source_label(result.source)
-                content_preview = result.content[:500]
+                content_preview = result.content[:500]  # Ограничиваем длину
 
-                parts.append(f"### Source {i} ({source_label}):")
+                parts.append(f"### Fuente {i} ({source_label}):")
+                # Добавляем метаданные
                 if result.metadata.get('group_name'):
-                    parts.append(f"Group: {result.metadata['group_name']}")
+                    parts.append(f"Grupo: {result.metadata['group_name']}")
                 if result.metadata.get('document_title'):
-                    parts.append(f"Document: {result.metadata['document_title']}")
+                    parts.append(f"Documento: {result.metadata['document_title']}")
                 if result.metadata.get('deadline_date'):
-                    parts.append(f"Date: {result.metadata['deadline_date']}")
+                    parts.append(f"Fecha: {result.metadata['deadline_date']}")
                 if result.metadata.get('article_title'):
-                    parts.append(f"Article: {result.metadata['article_title']}")
+                    parts.append(f"Artículo: {result.metadata['article_title']}")
 
                 parts.append(f"{content_preview}\n")
 
-        # Tool results
+        # Результаты инструментов
         if tools_results:
-            parts.append("\n## Tool results:\n")
+            parts.append("\n## Resultados de herramientas:\n")
             for tool_result in tools_results:
                 if tool_result.success:
                     parts.append(f"### {tool_result.tool_type}:")
                     parts.append(f"{tool_result.result}\n")
 
-        # Conversation history
+        # История диалога
         if session_history and len(session_history) > 0:
-            parts.append("\n## Recent conversation history:\n")
+            parts.append("\n## Historial de conversación reciente:\n")
+            # Берем последние 3 сообщения
             for msg in session_history[-3:]:
-                role = "User" if msg.get("role") == "user" else "Assistant"
+                role = "Usuario" if msg.get("role") == "user" else "Asistente"
                 parts.append(f"{role}: {msg.get('content', '')[:200]}")
             parts.append("")
 
-        # The actual query
-        parts.append(f"\n## User question (respond in the SAME language as this question):\n{query}")
+        # Сам запрос
+        parts.append(f"\n## Pregunta del usuario:\n{query}")
 
         return "\n".join(parts)
 
     def _get_source_label(self, source: str) -> str:
-        """Source label (English to not bias response language)"""
+        """Метка источника для отображения"""
         labels = {
-            "telegram": "Telegram Community",
-            "pdf": "Legal Document",
-            "calendar": "Tax Calendar",
-            "news": "News"
+            "telegram": "Comunidad Telegram",
+            "pdf": "Documento Legal",
+            "calendar": "Calendario Fiscal",
+            "news": "Noticias"
         }
         return labels.get(source, source)
