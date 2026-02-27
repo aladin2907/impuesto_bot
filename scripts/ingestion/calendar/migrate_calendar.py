@@ -83,13 +83,15 @@ def migrate_calendar(data_dir: str = 'data'):
     print(f"  Записей в calendar_deadlines: {existing_count}")
 
     if existing_count > 0:
-        response = input(f"\n⚠️  В БД уже есть {existing_count} записей. Удалить? (yes/no): ")
-        if response.lower() == 'yes':
-            print(f"\n🗑️  Удаление существующих записей...")
+        # Auto-delete old records when --force flag is passed
+        force = '--force' in sys.argv
+        if force:
+            print(f"\n🗑️  Удаление существующих {existing_count} записей (--force)...")
             deleted = repo.delete_all()
             print(f"  ✅ Удалено: {deleted} записей")
         else:
-            print("  ⏭️  Пропускаем удаление, будет upsert")
+            print(f"\n⚠️  В БД уже есть {existing_count} записей. Используйте --force для перезаписи.")
+            print("  ⏭️  Добавляем новые записи (upsert)")
 
     # Загружаем данные из файлов
     calendar_files = [

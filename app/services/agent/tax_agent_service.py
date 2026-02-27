@@ -238,13 +238,19 @@ class TaxAgentService:
             logger.warning(f"Failed to save message: {e}")
 
     def _get_error_message(self, query: str) -> str:
-        """Сообщение об ошибке на языке пользователя"""
-        # Определяем язык по символам
+        """Error message in user's language"""
         if any('\u0400' <= c <= '\u04FF' for c in query):
             return (
                 "Извините, произошла ошибка при обработке вашего запроса. "
                 "Пожалуйста, попробуйте переформулировать вопрос или "
                 "попробуйте позже."
+            )
+        query_lower = query.lower()
+        eng_markers = ['what', 'how', 'when', 'the', 'is', 'are', 'do', 'can', 'my', 'tax', 'i ']
+        if any(w in query_lower.split() for w in eng_markers):
+            return (
+                "Sorry, an error occurred while processing your query. "
+                "Please try rephrasing your question or try again later."
             )
         return (
             "Lo siento, ha ocurrido un error al procesar tu consulta. "
