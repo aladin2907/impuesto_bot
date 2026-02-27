@@ -23,9 +23,9 @@ class UserPlan:
     """Данные о плане пользователя"""
     plan_name: str
     daily_limit: Optional[int]
-    weekly_limit: Optional[int]
+    monthly_limit: Optional[int]
     messages_today: int
-    messages_this_week: int
+    messages_this_month: int
     messages_remaining: Optional[int]
     is_premium: bool
     expires_at: Optional[datetime]
@@ -38,64 +38,86 @@ class UserPlan:
         return self.messages_remaining is not None and self.messages_remaining > 0
 
     @property
-    def _is_weekly_limit_hit(self) -> bool:
-        """Достигнут ли именно недельный лимит"""
-        if self.weekly_limit is None:
+    def _is_monthly_limit_hit(self) -> bool:
+        """Достигнут ли именно месячный лимит"""
+        if self.monthly_limit is None:
             return False
-        return self.messages_this_week >= self.weekly_limit
+        return self.messages_this_month >= self.monthly_limit
 
     @property
     def limit_message_ru(self) -> str:
         """Сообщение о лимите на русском"""
         if self.plan_name == 'free':
-            if self._is_weekly_limit_hit:
+            if self._is_monthly_limit_hit:
                 return (
-                    f"⚠️ Вы использовали все {self.weekly_limit} бесплатных запросов на эту неделю.\n\n"
+                    f"⚠️ Вы использовали все {self.monthly_limit} бесплатных запросов в этом месяце.\n\n"
                     f"Тарифные планы:\n"
-                    f"📦 *Basic* — €2.99/мес (25 запросов/день)\n"
-                    f"🚀 *Pro* — €9.99/мес (безлимит + все функции)\n\n"
+                    f"📦 *Basic* — €2.99/мес (10 запросов/день, 50/мес)\n"
+                    f"🚀 *Pro* — €9.99/мес (25 запросов/день, 150/мес)\n\n"
                     f"Используйте /subscribe для оформления подписки.\n"
-                    f"Недельный лимит сбросится в понедельник."
+                    f"Месячный лимит сбросится 1-го числа."
                 )
             return (
                 f"⚠️ Вы использовали все {self.daily_limit} бесплатных запросов на сегодня.\n\n"
                 f"Тарифные планы:\n"
-                f"📦 *Basic* — €2.99/мес (25 запросов/день)\n"
-                f"🚀 *Pro* — €9.99/мес (безлимит + все функции)\n\n"
+                f"📦 *Basic* — €2.99/мес (10 запросов/день, 50/мес)\n"
+                f"🚀 *Pro* — €9.99/мес (25 запросов/день, 150/мес)\n\n"
                 f"Используйте /subscribe для оформления подписки.\n"
                 f"Дневной лимит сбросится через 24 часа."
             )
+        if self.plan_name == 'basic':
+            if self._is_monthly_limit_hit:
+                return (
+                    f"⚠️ Вы использовали все {self.monthly_limit} запросов в этом месяце (план Basic).\n\n"
+                    f"🚀 Перейдите на *Pro* за €9.99/мес — 25 запросов/день, 150/мес!\n\n"
+                    f"Используйте /subscribe для апгрейда."
+                )
+            return (
+                f"⚠️ Вы использовали все {self.daily_limit} запросов на сегодня (план Basic).\n\n"
+                f"🚀 Перейдите на *Pro* за €9.99/мес — 25 запросов/день, 150/мес!\n\n"
+                f"Используйте /subscribe для апгрейда."
+            )
         return (
-            f"⚠️ Вы использовали все {self.daily_limit} запросов на сегодня (план Basic).\n\n"
-            f"🚀 Перейдите на *Pro* за €9.99/мес — безлимитные запросы!\n\n"
-            f"Используйте /subscribe для апгрейда."
+            f"⚠️ Вы достигли лимита запросов (план Pro).\n\n"
+            f"Лимит сбросится завтра."
         )
 
     @property
     def limit_message_es(self) -> str:
         """Сообщение о лимите на испанском"""
         if self.plan_name == 'free':
-            if self._is_weekly_limit_hit:
+            if self._is_monthly_limit_hit:
                 return (
-                    f"⚠️ Has usado tus {self.weekly_limit} consultas gratuitas de esta semana.\n\n"
+                    f"⚠️ Has usado tus {self.monthly_limit} consultas gratuitas de este mes.\n\n"
                     f"Planes disponibles:\n"
-                    f"📦 *Basic* — €2.99/mes (25 consultas/día)\n"
-                    f"🚀 *Pro* — €9.99/mes (ilimitado + todas las funciones)\n\n"
+                    f"📦 *Basic* — €2.99/mes (10 consultas/día, 50/mes)\n"
+                    f"🚀 *Pro* — €9.99/mes (25 consultas/día, 150/mes)\n\n"
                     f"Usa /subscribe para suscribirte.\n"
-                    f"Tu límite semanal se renueva el lunes."
+                    f"Tu límite mensual se renueva el día 1."
                 )
             return (
                 f"⚠️ Has usado tus {self.daily_limit} consultas gratuitas de hoy.\n\n"
                 f"Planes disponibles:\n"
-                f"📦 *Basic* — €2.99/mes (25 consultas/día)\n"
-                f"🚀 *Pro* — €9.99/mes (ilimitado + todas las funciones)\n\n"
+                f"📦 *Basic* — €2.99/mes (10 consultas/día, 50/mes)\n"
+                f"🚀 *Pro* — €9.99/mes (25 consultas/día, 150/mes)\n\n"
                 f"Usa /subscribe para suscribirte.\n"
                 f"Tu límite diario se renueva en 24 horas."
             )
+        if self.plan_name == 'basic':
+            if self._is_monthly_limit_hit:
+                return (
+                    f"⚠️ Has usado tus {self.monthly_limit} consultas de este mes (plan Basic).\n\n"
+                    f"🚀 Pasa a *Pro* por €9.99/mes — 25 consultas/día, 150/mes!\n\n"
+                    f"Usa /subscribe para hacer upgrade."
+                )
+            return (
+                f"⚠️ Has usado tus {self.daily_limit} consultas de hoy (plan Basic).\n\n"
+                f"🚀 Pasa a *Pro* por €9.99/mes — 25 consultas/día, 150/mes!\n\n"
+                f"Usa /subscribe para hacer upgrade."
+            )
         return (
-            f"⚠️ Has usado tus {self.daily_limit} consultas de hoy (plan Basic).\n\n"
-            f"🚀 Pasa a *Pro* por €9.99/mes — ¡consultas ilimitadas!\n\n"
-            f"Usa /subscribe para hacer upgrade."
+            f"⚠️ Has alcanzado el límite de consultas (plan Pro).\n\n"
+            f"Tu límite se renueva mañana."
         )
 
 
@@ -107,19 +129,19 @@ class SubscriptionService:
         'free': {
             'name': 'Free',
             'daily_limit': 5,
-            'weekly_limit': 10,
+            'monthly_limit': 20,
             'price_monthly': 0,
         },
         'basic': {
             'name': 'Basic',
-            'daily_limit': 25,
-            'weekly_limit': None,
+            'daily_limit': 10,
+            'monthly_limit': 50,
             'price_monthly': 2.99,
         },
         'pro': {
             'name': 'Pro',
-            'daily_limit': None,  # Безлимит
-            'weekly_limit': None,
+            'daily_limit': 25,
+            'monthly_limit': 150,
             'price_monthly': 9.99,
         }
     }
@@ -167,9 +189,9 @@ class SubscriptionService:
                 return UserPlan(
                     plan_name=row['plan_name'],
                     daily_limit=row['daily_limit'],
-                    weekly_limit=row.get('weekly_limit'),
+                    monthly_limit=row.get('monthly_limit'),
                     messages_today=row['messages_today'],
-                    messages_this_week=row.get('messages_this_week', row['messages_today']),
+                    messages_this_month=row.get('messages_this_month', row['messages_today']),
                     messages_remaining=row['messages_remaining'],
                     is_premium=row['is_premium'],
                     expires_at=row['expires_at']
@@ -191,9 +213,9 @@ class SubscriptionService:
         return UserPlan(
             plan_name='free',
             daily_limit=5,
-            weekly_limit=10,
+            monthly_limit=20,
             messages_today=0,
-            messages_this_week=0,
+            messages_this_month=0,
             messages_remaining=5,
             is_premium=False,
             expires_at=None

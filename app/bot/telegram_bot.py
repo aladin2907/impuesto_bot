@@ -197,16 +197,16 @@ async def cmd_subscribe(message: Message):
             text = (
                 "🚀 *Тарифные планы TuExpertoFiscal*\n\n"
                 "📦 *Free* — бесплатно\n"
-                "  • 5 запросов/день, 10/неделю\n"
+                "  • 5 запросов/день, 20/месяц\n"
                 "  • Калькулятор + Календарь\n"
                 "  • История 7 дней\n\n"
                 "⭐ *Basic* — €2.99/мес\n"
-                "  • 25 запросов в день\n"
+                "  • 10 запросов/день, 50/месяц\n"
                 "  • Поиск в документах\n"
                 "  • Напоминания о дедлайнах\n"
                 "  • История 30 дней\n\n"
                 "🚀 *Pro* — €9.99/мес\n"
-                "  • Безлимитные запросы\n"
+                "  • 25 запросов/день, 150/месяц\n"
                 "  • Все функции\n"
                 "  • Приоритетные ответы\n"
                 "  • Безлимитная история\n\n"
@@ -216,16 +216,16 @@ async def cmd_subscribe(message: Message):
             text = (
                 "🚀 *Planes TuExpertoFiscal*\n\n"
                 "📦 *Free* — gratis\n"
-                "  • 5 consultas/día, 10/semana\n"
+                "  • 5 consultas/día, 20/mes\n"
                 "  • Calculadora + Calendario\n"
                 "  • Historial 7 días\n\n"
                 "⭐ *Basic* — €2.99/mes\n"
-                "  • 25 consultas/día\n"
+                "  • 10 consultas/día, 50/mes\n"
                 "  • Búsqueda en documentos\n"
                 "  • Recordatorios de plazos\n"
                 "  • Historial 30 días\n\n"
                 "🚀 *Pro* — €9.99/mes\n"
-                "  • Consultas ilimitadas\n"
+                "  • 25 consultas/día, 150/mes\n"
                 "  • Todas las funciones\n"
                 "  • Respuestas prioritarias\n"
                 "  • Historial ilimitado\n\n"
@@ -305,16 +305,16 @@ async def callback_show_plans(callback: CallbackQuery):
     if is_russian:
         text = (
             "⭐ *Basic* — €2.99/мес\n"
-            "25 запросов/день, поиск в документах\n\n"
+            "10 запросов/день, 50/месяц\n\n"
             "🚀 *Pro* — €9.99/мес\n"
-            "Безлимит, все функции, приоритет"
+            "25 запросов/день, 150/месяц"
         )
     else:
         text = (
             "⭐ *Basic* — €2.99/mes\n"
-            "25 consultas/día, búsqueda en documentos\n\n"
+            "10 consultas/día, 50/mes\n\n"
             "🚀 *Pro* — €9.99/mes\n"
-            "Ilimitado, todas las funciones, prioridad"
+            "25 consultas/día, 150/mes"
         )
 
     buttons = []
@@ -347,28 +347,28 @@ async def cmd_status(message: Message):
     remaining_text = "∞" if plan.daily_limit is None else str(remaining)
 
     if is_russian:
-        daily_text = "Безлимит" if plan.daily_limit is None else f"{plan.messages_today}/{plan.daily_limit}"
+        daily_text = f"{plan.messages_today}/{plan.daily_limit}" if plan.daily_limit else "—"
         status_text = (
             f"👤 *Ваш аккаунт*\n\n"
             f"📦 План: *{plan.plan_name.capitalize()}*\n"
             f"📊 Запросов сегодня: {daily_text}\n"
         )
-        if plan.weekly_limit is not None:
-            status_text += f"📅 За неделю: {plan.messages_this_week}/{plan.weekly_limit}\n"
+        if plan.monthly_limit is not None:
+            status_text += f"📅 За месяц: {plan.messages_this_month}/{plan.monthly_limit}\n"
         status_text += f"⏳ Осталось: {remaining_text}\n"
         if plan.expires_at:
             status_text += f"📅 Действует до: {plan.expires_at.strftime('%d/%m/%Y')}\n"
         if plan.plan_name != 'pro':
             status_text += "\n💡 /subscribe — посмотреть тарифы"
     else:
-        daily_text = "Ilimitado" if plan.daily_limit is None else f"{plan.messages_today}/{plan.daily_limit}"
+        daily_text = f"{plan.messages_today}/{plan.daily_limit}" if plan.daily_limit else "—"
         status_text = (
             f"👤 *Tu cuenta*\n\n"
             f"📦 Plan: *{plan.plan_name.capitalize()}*\n"
             f"📊 Consultas hoy: {daily_text}\n"
         )
-        if plan.weekly_limit is not None:
-            status_text += f"📅 Esta semana: {plan.messages_this_week}/{plan.weekly_limit}\n"
+        if plan.monthly_limit is not None:
+            status_text += f"📅 Este mes: {plan.messages_this_month}/{plan.monthly_limit}\n"
         status_text += f"⏳ Restantes: {remaining_text}\n"
         if plan.expires_at:
             status_text += f"📅 Válido hasta: {plan.expires_at.strftime('%d/%m/%Y')}\n"
