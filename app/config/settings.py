@@ -16,7 +16,7 @@ class Settings:
     
     # LLM Configuration
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "openai")  # openai, google, anthropic, openrouter
-    LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4.1")
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-5.2")
     LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.7"))
     
     # OpenAI
