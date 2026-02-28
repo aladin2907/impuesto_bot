@@ -410,8 +410,23 @@ async def handle_message(message: Message):
                                      reply_markup=_subscribe_keyboard(False))
             return
 
-    # Показываем индикатор "печатает..."
-    await message.chat.do(ChatAction.TYPING)
+    # Отправляем статус-сообщение
+    status_texts = {
+        "search": "📚 Ищу в базе знаний..." if is_russian else "📚 Buscando en la base de conocimientos...",
+        "tools": "🧮 Обрабатываю данные..." if is_russian else "🧮 Procesando datos...",
+        "generate": "✍️ Готовлю ответ..." if is_russian else "✍️ Preparando la respuesta...",
+    }
+    status_msg = await message.answer(
+        "🔍 Анализирую ваш вопрос..." if is_russian else "🔍 Analizando tu pregunta..."
+    )
+
+    async def update_status(step: str):
+        text = status_texts.get(step)
+        if text:
+            try:
+                await status_msg.edit_text(text)
+            except Exception:
+                pass
 
     try:
         # Инкрементируем счётчик использования
@@ -421,15 +436,21 @@ async def handle_message(message: Message):
         # Обрабатываем запрос через агента
         response = await agent.process_query(
             query=query,
-            user_id=str(user.id)
+            user_id=str(user.id),
+            progress_callback=update_status
         )
+
+        # Удаляем статус-сообщение
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
 
         # Формируем ответ и очищаем Markdown для Telegram
         reply_text = _clean_markdown_for_telegram(response.text)
 
         # Добавляем метаданные (опционально)
         if response.confidence < 0.5:
-            # Определяем язык для предупреждения
             if any('\u0400' <= c <= '\u04FF' for c in query):
                 reply_text += LOW_CONFIDENCE_WARNING_RU
             else:
@@ -441,18 +462,28 @@ async def handle_message(message: Message):
 
         # Отправляем ответ (разбиваем на части если длинный)
         if len(reply_text) > 4000:
-            # Telegram ограничивает сообщения до 4096 символов
             parts = [reply_text[i:i+4000] for i in range(0, len(reply_text), 4000)]
             for i, part in enumerate(parts):
-                # Кнопку только к последней части
                 markup = reply_markup if i == len(parts) - 1 else None
                 await message.answer(part, parse_mode=ParseMode.MARKDOWN, reply_markup=markup)
         else:
             try:
                 await message.answer(reply_text, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup)
             except Exception:
-                # Если Markdown не парсится, отправляем без форматирования
                 await message.answer(reply_text, reply_markup=reply_markup)
+
+        # Рекламный блок для free-пользователей
+        if user_plan and user_plan.plan_name == 'free':
+            ad_text = (
+                "━━━━━━━━━━━━━━━\n"
+                "📢 Здесь может быть Ваша реклама\n"
+                "👉 @valencia\\_dvizh"
+                if is_russian else
+                "━━━━━━━━━━━━━━━\n"
+                "📢 Aquí puede estar tu publicidad\n"
+                "👉 @valencia\\_dvizh"
+            )
+            await message.answer(ad_text, parse_mode=ParseMode.MARKDOWN)
 
         logger.info(
             f"Response sent to {user.id}: "
@@ -463,6 +494,10 @@ async def handle_message(message: Message):
 
     except Exception as e:
         logger.error(f"Error processing message from {user.id}: {e}")
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
         await message.answer(
             "Lo siento, ha ocurrido un error. Por favor, inténtalo de nuevo."
         )

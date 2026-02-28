@@ -9,7 +9,7 @@ TaxAgentService - главный оркестратор AI налогового 
 """
 import time
 import logging
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Callable, Awaitable
 
 from app.models.agent import (
     QueryType, AgentRequest, AgentResponse, Context,
@@ -80,7 +80,8 @@ class TaxAgentService:
         user_id: str,
         session_id: Optional[str] = None,
         include_tools: bool = True,
-        max_context_items: int = 10
+        max_context_items: int = 10,
+        progress_callback: Optional[Callable[[str], Awaitable[None]]] = None
     ) -> AgentResponse:
         """
         Основной метод обработки запроса пользователя
@@ -101,6 +102,8 @@ class TaxAgentService:
 
         try:
             # Шаг 1: Классификация + поиск контекста
+            if progress_callback:
+                await progress_callback("search")
             context, classification = await self.retriever.retrieve(
                 query=query,
                 top_k=max_context_items,
@@ -113,9 +116,11 @@ class TaxAgentService:
                 f"time={classification.classification_time_ms:.0f}ms)"
             )
 
-            # Шаг 2: Выполнение инструментов (параллельно с контекстом)
+            # Шаг 2: Выполнение инструментов
             tools_results = []
             if include_tools:
+                if progress_callback:
+                    await progress_callback("tools")
                 tools_results = await self.tool_executor.execute_tools(
                     query=query,
                     query_type=classification.query_type
@@ -135,6 +140,8 @@ class TaxAgentService:
                 )
 
             # Шаг 4: Генерация ответа
+            if progress_callback:
+                await progress_callback("generate")
             response = await self.generator.generate(
                 query=query,
                 context=context,
